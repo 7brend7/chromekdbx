@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+    "name": "Chrome kdbx",
+    "version": "0.0.1",
+    "default_locale": "en",
+    "description": "A plain text description",
+    "icons": {
+        "16": "static/icons/icon-16.png",
+        "32": "static/icons/icon-32.png",
+        "48": "static/icons/icon-48.png",
+        "64": "static/icons/icon-64.png",
+        "128": "static/icons/icon-128.png"
+    },
+    "browser_action": {
+        "default_icon": {
+            "16": "static/icons/icon-32.png",
+            "32": "static/icons/icon-32.png"
+        }
+    },
+    "author": "Borys Anikiyenko <7brend7@gmail.com>",
+    "background": {
+        "scripts": [
+            "static/js/background.js"
+        ],
+        "persistent": false
+    }
+}
