@@ -1,2 +1,6 @@
 # Dependency directories
 node_modules/
+
+# generated files
+extension/static/css/*
+extension/static/js/*
