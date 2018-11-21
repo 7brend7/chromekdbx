@@ -6,5 +6,6 @@
  */
 
 chrome.runtime.onInstalled.addListener(() => {
-    debugger;
+    const url_string = chrome.extension.getURL('views/start.html');
+    chrome.tabs.create({active: true, url: url_string});
 });
