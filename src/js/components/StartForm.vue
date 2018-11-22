@@ -8,9 +8,6 @@
 
 <script>
     import kdbxweb from 'kdbxweb';
-    import argon2 from 'argon2-browser';
-
-    kdbxweb.CryptoEngine.argon2 = argon2;
 
     export default {
         data() {
@@ -28,7 +25,7 @@
                     const arrayBuffer = this.result;
                     const credentials = new kdbxweb.Credentials(kdbxweb.ProtectedValue.fromString(passwd), null);
                     kdbxweb.Kdbx.load(arrayBuffer, credentials).then(db => {
-
+                        console.log('DB loaded');
                     });
 
                 };
