@@ -5,16 +5,15 @@
     "default_locale": "en",
     "description": "A plain text description",
     "icons": {
-        "16": "static/icons/icon-16.png",
-        "32": "static/icons/icon-32.png",
-        "48": "static/icons/icon-48.png",
-        "64": "static/icons/icon-64.png",
-        "128": "static/icons/icon-128.png"
+        "16": "static/icons/keepass_16x16.png",
+        "32": "static/icons/keepass_32x32.png",
+        "48": "static/icons/keepass_48x48.png",
+        "64": "static/icons/keepass_64x64.png"
     },
     "browser_action": {
         "default_icon": {
-            "16": "static/icons/icon-32.png",
-            "32": "static/icons/icon-32.png"
+            "16": "static/icons/keepass_16x16.png",
+            "32": "static/icons/keepass_32x32.png"
         }
     },
     "author": "Borys Anikiyenko <7brend7@gmail.com>",

@@ -1,0 +1,50 @@
+@import 'base';
+
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.startForm {
+    display: flex;
+    line-height: 2;
+
+    label {
+        font-size: 16px;
+    }
+
+    input {
+        display: block;
+    }
+}
+
+.startForm--divider {
+    width: 0;
+    margin: 0 40px;
+    border-right: 1px solid $startFormDividerColor;
+}
+
+.startForm--divider-H {
+    height: 0;
+    margin: 10px 0;
+    border-bottom: 1px solid $startFormDividerColor;
+}
+
+.startForm--formFileContainer {
+    overflow: hidden;
+    position: relative;
+}
+
+.startForm--formFileContainer [type=file] {
+    position: absolute;
+    font-size: 100px;
+    opacity: 0;
+    left: 0;
+    top: 0;
+}
+
+.startForm--form {
+    display: flex;
+    align-items: center;
+}
