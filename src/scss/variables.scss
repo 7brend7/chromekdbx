@@ -1,12 +1,19 @@
 $color-1: #ccc;
 $color-2: #5e6d82;
 $color-3: #3988e1;
+$color-4: #16536e;
+$color-5: #d23e30;
 
 $mainTextColor: $color-2;
 $inputTextColor: $color-2;
 $linkColor: $color-3;
 $startFormDividerColor: $color-1;
 $inputBorderColor: $color-1;
+$inputFocusBorderColor: $color-3;
+$inputErrorBorderColor: $color-5;
+$buttonColor: $color-4;
+$buttonColorActive: darken($color-4, 5);
+$buttonTextColor: #fff;
 
 
 $mainFontSize: 14px;

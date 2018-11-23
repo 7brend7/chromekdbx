@@ -12,6 +12,11 @@ main {
 
     label {
         font-size: 16px;
+        margin: 5px 0;
+    }
+
+    label.startForm--formFileContainerNote {
+        font-size: 13px;
     }
 
     input {
@@ -47,4 +52,9 @@ main {
 .startForm--form {
     display: flex;
     align-items: center;
+}
+
+.startForm--formFileContainerContinueBtn {
+    margin-top: 20px;
+    float: right;
 }
