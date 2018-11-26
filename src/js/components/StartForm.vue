@@ -7,22 +7,34 @@
             <div class="startForm--divider"></div>
             <div class="startForm--form">
                 <div class="startForm--formAlign">
-                    <label>Please choose your existing kdbx database:</label>
+                    <span v-if="!isNewDb">
+                        <label>{{getMsg('startForm_choose_db')}}</label>
 
-                    <label class="startForm--formFileContainer">
-                        <input type="text" placeholder="Click here to trigger the file uploader" v-model="fileName" :class="[{'error': checkError('db')}]" />
-                        <input type="file" @change="processFile($event)" />
-                    </label>
+                        <label class="startForm--formFileContainer">
+                            <input type="text" :placeholder="getMsg('startForm_file_placeholder')" v-model="fileName" :class="[{'error': checkError('db')}]"/>
+                            <input type="file" @change="processFile($event)"/>
+                        </label>
 
-                    <label class="startForm--formFileContainerNote">
-                        Don't have such? <a href="#" @click="generateDb">click here</a>.
-                    </label>
+                        <label class="startForm--formFileContainerNote">
+                            {{getMsg('startForm_dont_have_such')}} <a href="#" @click.prevent="switchDb(true)">{{getMsg('startForm_click_here')}}</a>.
+                        </label>
+                    </span>
+                    <span v-else>
+                        <span v-html="getMsg('startForm_create_db_intro')"></span>
+                        <label class="startForm--formFileContainerNote">
+                            {{getMsg('startForm_still_open_db')}} <a href="#" @click.prevent="switchDb(false)">{{getMsg('startForm_click_here')}}</a>.
+                        </label>
+                    </span>
 
                     <div class="startForm--divider-H"></div>
 
-                    <label>Password for database:</label>
-                    <input v-model="password" type="password"  :class="[{'error': checkError('password')}]" />
-                    <button class="startForm--formFileContainerContinueBtn" type="button" @click="openDbFile">Continue</button>
+                    <label>{{getMsg('startForm_password')}}</label>
+                    <input v-model="password" type="password" :class="[{'error': checkError('password')}]"/>
+
+                    <label v-if="isNewDb">{{getMsg('startForm_repeat_password')}}</label>
+                    <input v-if="isNewDb" v-model="re_password" type="password" :class="[{'error': checkError('re_password')}]"/>
+
+                    <button class="startForm--formFileContainerContinueBtn" type="button" @click="openDbFile">{{getMsg('startForm_continue')}}</button>
                 </div>
             </div>
         </div>
@@ -37,31 +49,40 @@
             return {
                 fileName: '',
                 password: null,
+                re_password: null,
+
+                isNewDb: false,
+
                 db: null,
                 errors: {}
             }
         },
         methods: {
-            checkError: function(name) {
+            getMsg: function(text) {
+                return chrome.i18n.getMessage(text);
+            },
+            checkError: function (name) {
                 return typeof this.errors[name] != 'undefined';
             },
-            generateDb: function(e) {
-
-
-                e.preventDefault();
-            },
-            validate: function() {
+            switchDb: function (isNewDb) {
                 this.errors = {};
+                this.isNewDb = isNewDb;
+            },
+            validate: function () {
+                this.errors = {};
+                let validationFields = this.isNewDb ? ['password', 're_password'] : ['db', 'password'];
 
-                for (let value of ['db', 'password']) {
-                    if(!this[value]) {
+                for (let value of validationFields) {
+                    if (!this[value]) {
                         this.errors[value] = true;
                     }
                 }
 
+                this.isNewDb && this.password !== this.re_password && (this.errors['re_password'] = true);
+
                 return Object.keys(this.errors).length == 0;
             },
-            openDbFile: function() {
+            openDbFile: function () {
                 if (!this.validate()) {
                     return;
                 }
@@ -69,7 +90,7 @@
                 const reader = new FileReader();
                 const passwd = this.password;
 
-                reader.onload = function() {
+                reader.onload = function () {
                     const arrayBuffer = this.result;
                     const credentials = new kdbxweb.Credentials(kdbxweb.ProtectedValue.fromString(passwd), null);
                     kdbxweb.Kdbx.load(arrayBuffer, credentials).then(db => {
@@ -80,7 +101,7 @@
 
                 reader.readAsArrayBuffer(this.db);
             },
-            processFile: function() {
+            processFile: function () {
                 this.db = event.target.files[0];
                 this.fileName = this.db.name;
             }

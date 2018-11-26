@@ -1,3 +1,11 @@
 {
-	
+    "startForm_choose_db": {"message": "Please choose your existing kdbx database:"},
+    "startForm_file_placeholder": {"message": "Click here to trigger the file uploader"},
+    "startForm_dont_have_such": {"message": "Don't have such?"},
+    "startForm_click_here": {"message": "click here"},
+    "startForm_create_db_intro": {"message": "We are going to create a new database instance,<br>\nyou will be able to download it later.<br>"},
+    "startForm_still_open_db": {"message": "If you still want to open an existed database,"},
+    "startForm_password": {"message": "Password for database:"},
+    "startForm_repeat_password": {"message": "Repeat password:"},
+    "startForm_continue": {"message": "Continue"}
 }
