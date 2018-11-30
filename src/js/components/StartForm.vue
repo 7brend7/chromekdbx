@@ -34,7 +34,7 @@
                     <label v-if="isNewDb">{{getMsg('startForm_repeat_password')}}</label>
                     <input v-if="isNewDb" v-model="re_password" type="password" :class="[{'error': checkError('re_password')}]"/>
 
-                    <button class="startForm--formFileContainerContinueBtn" type="button" @click="openDbFile">{{getMsg('startForm_continue')}}</button>
+                    <button class="startForm--formFileContainerContinueBtn" type="button" @click="submit">{{getMsg('startForm_continue')}}</button>
                 </div>
             </div>
         </div>
@@ -43,6 +43,8 @@
 
 <script>
     import kdbxweb from 'kdbxweb';
+    import databaseManager from '../DatabaseManager';
+    import passwordManager from '../PasswordManager';
 
     export default {
         data() {
@@ -82,24 +84,30 @@
 
                 return Object.keys(this.errors).length == 0;
             },
-            openDbFile: function () {
+            submit: function () {
                 if (!this.validate()) {
                     return;
                 }
 
                 const reader = new FileReader();
-                const passwd = this.password;
+                const passwd = passwordManager.set(this.password);
 
-                reader.onload = function () {
-                    const arrayBuffer = this.result;
-                    const credentials = new kdbxweb.Credentials(kdbxweb.ProtectedValue.fromString(passwd), null);
-                    kdbxweb.Kdbx.load(arrayBuffer, credentials).then(db => {
-                        console.log('DB loaded');
-                    });
+                const credentials = new kdbxweb.Credentials(passwd, null);
 
-                };
+                if (this.isNewDb) {
+                    databaseManager.initNew(credentials);
+                }
+                else {
+                    reader.onload = function () {
+                        const arrayBuffer = this.result;
+                        kdbxweb.Kdbx.load(arrayBuffer, credentials).then(db => {
+                            databaseManager.initExisted(db);
+                        });
 
-                reader.readAsArrayBuffer(this.db);
+                    };
+
+                    reader.readAsArrayBuffer(this.db);
+                }
             },
             processFile: function () {
                 this.db = event.target.files[0];
