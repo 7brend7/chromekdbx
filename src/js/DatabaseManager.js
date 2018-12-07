@@ -7,11 +7,12 @@
 
 import kdbxweb from 'kdbxweb';
 import storageManager from "./StorageManager";
+import passwordManager from "./PasswordManager";
 
 class DatabaseManager {
 
-    constructor(db) {
-
+    constructor() {
+        this.db = null;
     }
 
     initNew(credentials) {
@@ -25,6 +26,16 @@ class DatabaseManager {
 
     initExisted(db) {
         //return new DatabaseManager(db);
+    }
+
+    async openDb() {
+        const dbBuffer = await storageManager.getItem('db');
+        const passwd = await passwordManager.get();
+        const credentials = new kdbxweb.Credentials(passwd, null);
+
+        this.db = await kdbxweb.Kdbx.load(dbBuffer, credentials);
+
+        console.log(this.db);
     }
 }
 

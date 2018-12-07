@@ -52,9 +52,19 @@ main {
 .startForm--form {
     display: flex;
     align-items: center;
+    margin-right: 30px;
 }
 
 .startForm--formFileContainerContinueBtn {
     margin-top: 20px;
     float: right;
+}
+
+.startForm--closeBtn {
+    margin-top: 20px;
+    float: right;
+}
+
+.startForm--readyToStartLbl {
+    font-size: 26px;
 }

@@ -13,8 +13,6 @@ class StorageManager {
         this.dbName = 'storage';
         this.dbStorageName = 'keyval';
         this.db = null;
-
-        this.initDb();
     }
 
     async initDb() {
@@ -43,6 +41,10 @@ class StorageManager {
     }
 
     async setItem(key, value) {
+        if (!this.db) {
+            await this.initDb();
+        }
+
         const name = await this.generateName(key);
 
         const { tx, store } = this.getStore();
@@ -51,6 +53,10 @@ class StorageManager {
     }
 
     async getItem(key) {
+        if (!this.db) {
+            await this.initDb();
+        }
+
         const name = await this.generateName(key);
 
         const { store } = this.getStore();

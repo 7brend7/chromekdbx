@@ -11,25 +11,18 @@ import storageManager from './StorageManager';
 class PasswordManager {
 
     constructor() {
-
-        /** @type ProtectedValue */
-        this.passwd = null;
-
-        this.init();
     }
 
-    init() {
-    }
-
-    set(passwd) {
+    async set(passwd) {
         this.passwd = kdbxweb.ProtectedValue.fromString(passwd);
-        storageManager.setItem('password', this.passwd.getBinary());
-        return this.get();
+        await storageManager.setItem('password', this.passwd.getBinary());
+        return await this.get();
     }
 
 
-    get() {
-        return this.passwd;
+    async get() {
+        const passwdBinary = await storageManager.getItem('password');
+        return kdbxweb.ProtectedValue.fromBinary(passwdBinary);
     }
 }
 

@@ -7,5 +7,8 @@
     "startForm_still_open_db": {"message": "If you still want to open an existed database,"},
     "startForm_password": {"message": "Password for database:"},
     "startForm_repeat_password": {"message": "Repeat password:"},
-    "startForm_continue": {"message": "Continue"}
+    "startForm_continue": {"message": "Continue"},
+    "startForm_ready_to_start": {"message": "We are ready to start!"},
+    "startForm_close": {"message": "Close"},
+    "startForm_ready_to_message": {"message": "Database was successfully initialized, you can start to use chromekdbx"}
 }
