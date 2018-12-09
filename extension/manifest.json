@@ -22,9 +22,11 @@
         "scripts": [
             "static/js/background.js"
         ],
-        "persistent": false
+        "persistent": true
     },
     "permissions": [
-        "tabs"
+        "tabs",
+        "webRequest",
+        "*://*/*"
     ]
 }

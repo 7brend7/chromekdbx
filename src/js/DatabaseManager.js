@@ -34,8 +34,6 @@ class DatabaseManager {
         const credentials = new kdbxweb.Credentials(passwd, null);
 
         this.db = await kdbxweb.Kdbx.load(dbBuffer, credentials);
-
-        console.log(this.db);
     }
 }
 
