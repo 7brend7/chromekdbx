@@ -24,6 +24,10 @@ class PasswordManager {
         const passwdBinary = await storageManager.getItem('password');
         return kdbxweb.ProtectedValue.fromBinary(passwdBinary);
     }
+
+    async clear() {
+        await storageManager.deleteItem('password');
+    }
 }
 
 export default new PasswordManager();

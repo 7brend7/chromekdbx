@@ -40,15 +40,24 @@ class StorageManager {
         return hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
     }
 
+    async deleteItem(key) {
+        return await this.setItem(key, null);
+    }
+
     async setItem(key, value) {
         if (!this.db) {
             await this.initDb();
         }
 
-        const name = await this.generateName(key);
+        //const name = await this.generateName(key);
 
         const { tx, store } = this.getStore();
-        await store.put(value, name);
+        if (value === null) {
+            await store.delete(key);
+        }
+        else {
+            await store.put(value, key);
+        }
         return await tx.complete;
     }
 
@@ -57,10 +66,10 @@ class StorageManager {
             await this.initDb();
         }
 
-        const name = await this.generateName(key);
+        //const name = await this.generateName(key);
 
         const { store } = this.getStore();
-        return await store.get(name);
+        return await store.get(key);
     }
 }
 

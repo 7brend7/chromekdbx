@@ -10,6 +10,7 @@
                     <span v-if="isReady">
                         <label class="startForm--readyToStartLbl">{{getMsg('startForm_ready_to_start')}}</label>
                         <p class="startForm--readyToStartMessage">{{getMsg('startForm_ready_to_message')}}</p>
+                        <p @click.prevent="readyToStartHandler" v-html="getMsg('startForm_ready_to_download')"></p>
 
                         <button class="startForm--closeBtn" type="button" @click="close">{{getMsg('startForm_close')}}</button>
                     </span>
@@ -98,6 +99,51 @@
 
                 return Object.keys(this.errors).length == 0;
             },
+            readyToStartHandler: function(e) {
+                if (e.target.tagName.toLowerCase() === 'a') {
+                    switch (e.target.dataset.type) {
+                        case 'download': this.downloadDb(); break;
+                        case 'clear': this.clearAll(); break;
+                    }
+                }
+            },
+            downloadDb: function() {
+                databaseManager.reset();
+                databaseManager.getBinary().then(data => {
+                    const blob = new Blob([data], {type: "application/octet-stream"});
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = 'chromeKdbxDb.kdbx';
+                    link.click();
+                });
+            },
+            clearAll: function() {
+                passwordManager.clear();
+                databaseManager.clear();
+                localStorage.removeItem('startFormPassed');
+                this.isReady = false;
+            },
+            processDbManager: async function(credentials) {
+                return new Promise((res, rej) => {
+                    if (this.isNewDb) {
+                        res(databaseManager.initNew(credentials));
+                    }
+                    else {
+                        const reader = new FileReader();
+                        reader.onload = async function () {
+                            const arrayBuffer = this.result;
+                            console.log('start');
+                            await databaseManager.initExisted(arrayBuffer, credentials);
+                            console.log('start2');
+                            await databaseManager.saveDb();
+                            console.log('start3');
+                            res();
+                        };
+
+                        reader.readAsArrayBuffer(this.db);
+                    }
+                });
+            },
             submit: function () {
                 if (!this.validate()) {
                     return;
@@ -106,24 +152,17 @@
                 passwordManager.set(this.password).then(passwd => {
                     const credentials = new kdbxweb.Credentials(passwd, null);
 
-                    if (this.isNewDb) {
-                        databaseManager.initNew(credentials);
-                    }
-                    else {
-                        const reader = new FileReader();
-                        reader.onload = function () {
-                            const arrayBuffer = this.result;
-                            kdbxweb.Kdbx.load(arrayBuffer, credentials).then(db => {
-                                databaseManager.initExisted(db);
-                            });
+                    this.processDbManager(credentials)
+                        .then(() => {
+                            console.log('end');
+                            localStorage.setItem('startFormPassed', '1');
+                            this.isReady = true;
+                        })
+                        .catch((err) => {
+                            this.password = null;
+                            this.errors['password'] = true;
+                        });
 
-                        };
-
-                        reader.readAsArrayBuffer(this.db);
-                    }
-
-                    localStorage.setItem('startFormPassed', '1');
-                    this.isReady = true;
                 });
             },
             processFile: function () {

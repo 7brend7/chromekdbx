@@ -5,10 +5,10 @@
  * Time: 18:40
  */
 
+import { getTranslation } from '../utils';
+
 export default {
     methods: {
-        getMsg: function(text) {
-            return chrome.i18n.getMessage(text);
-        },
+        getMsg: getTranslation,
     }
 }

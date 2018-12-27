@@ -1,0 +1,97 @@
+<style>
+    #chromekdbxSavePopup * {
+        font-family: "Helvetica Neue",Helvetica;
+        color: #5e6d82;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        box-sizing: border-box;
+    }
+
+    #chromekdbxSavePopup {
+        position: fixed;
+        width: 350px;
+        top: 50px;
+        left: 50px;
+        background: #ffffff;
+        z-index: 99999999999;
+        box-shadow: 0 0 15px 1px #5E6D82;
+        padding: 15px 20px;
+        opacity: 0;
+        transform: scale(0.3);
+        transition: all .3s ease-in-out;
+    }
+
+    #chromekdbxSavePopup.chromekdbx-visible {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    #chromekdbxSavePopup hr {
+        border: none;
+        background: #5E6D82;
+        height: 1px;
+        margin: 10px 0 25px 0;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-popupTitle {
+        display: flex;
+        align-items: center;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-popupTitle p {
+        margin-left: 20px;
+        font-size: 13px;
+        line-height: 20px;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-popupTitle p b {
+        font-weight: 500;
+        color: #16536e;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-btn {
+        float: right;
+
+        padding: 8px 20px;
+        cursor: pointer;
+        outline: none;
+        margin: 0;
+        background-color: #16536e;
+        border: 1px solid #16536e;
+        color: #fff;
+        font-size: 13px;
+        border-radius: 4px;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-btn:active {
+        background-color: #153f59;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-btnSave {
+        margin-left: 20px
+    }
+
+    #chromekdbxSavePopup .chromekdbx-btnCancel {
+        color: #5E6D82;
+        background-color: #f7f7f7;
+        border: 1px solid #cccccc;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-btnCancel:active {
+        background-color: #d8d8d8;
+    }
+</style>
+<div id="chromekdbxSavePopup">
+
+    <div class="chromekdbx-popupTitle">
+        <img src="{{baseUrl}}static/icons/keepass_32x32.png" alt="chromekdbx logo"/>
+        <p>{{title}}</p>
+    </div>
+
+    <hr/>
+
+    <button type="button" data-type="save" class="chromekdbx-btn chromekdbx-btnSave">{{btn_save}}</button>
+    <button type="button" data-type="close" class="chromekdbx-btn chromekdbx-btnCancel">{{btn_cancel}}</button>
+
+</div>

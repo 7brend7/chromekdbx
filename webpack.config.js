@@ -8,8 +8,9 @@ const jsConf = {
     mode: 'development',
     devtool: 'cheap-module-source-map',
     entry: {
-        background: './src/js/background.js',
+        background: './src/js/App.js',
         start: './src/js/start.js',
+        'content-script': './src/js/ContentScript/ContentScript.js'
     },
     output: {
         path: path.join(__dirname, '/extension/static/js/'),
@@ -30,6 +31,15 @@ const jsConf = {
                     options: {
                         presets: ['@babel/preset-env'],
                         plugins: ['@babel/transform-runtime']
+                    }
+                }
+            },
+            {
+                test: /\.(html)$/,
+                use: {
+                    loader: 'html-loader',
+                    options: {
+                        attrs: [':data-src']
                     }
                 }
             }
@@ -75,7 +85,7 @@ const cssConf = {
         new FixStyleOnlyEntriesPlugin(),
         new MiniCssExtractPlugin({
             filename: "[name].css"
-        })
+        }),
     ],
 };
 
