@@ -18,6 +18,7 @@ class ContentScript {
     }
 
     checkPasswordField() {
+
         chrome.runtime.sendMessage({type: MSG_GET_PASSWORD, url: document.location.href}, (data) => {
             const item = data[0]; // temporary take the first one
 
@@ -44,6 +45,7 @@ class ContentScript {
             const inputs = [];
             [
                 ...document.querySelectorAll("input[type='text']"),
+                ...document.querySelectorAll("input[type='email']"),
                 ...document.querySelectorAll("input[type='password']"),
             ].forEach(item => {
                 if (NAME_REGEXP.test(item.name) || PASSWD_REGEXP.test(item.name)) {

@@ -131,13 +131,15 @@
                     else {
                         const reader = new FileReader();
                         reader.onload = async function () {
-                            const arrayBuffer = this.result;
-                            console.log('start');
-                            await databaseManager.initExisted(arrayBuffer, credentials);
-                            console.log('start2');
-                            await databaseManager.saveDb();
-                            console.log('start3');
-                            res();
+                            try {
+                                const arrayBuffer = this.result;
+                                await databaseManager.initExisted(arrayBuffer, credentials);
+                                await databaseManager.saveDb();
+                                res();
+                            }
+                            catch (e) {
+                                rej(e);
+                            }
                         };
 
                         reader.readAsArrayBuffer(this.db);

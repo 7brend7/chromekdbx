@@ -7,33 +7,98 @@
 
 class SelectorGenerator {
 
+
+    constructor() {
+        this.selectorPatterns = [
+            {
+                method: this.patternId.bind(this),
+                stopChaining: true,
+            },
+            {
+                method: this.patternTagName.bind(this),
+                stopChaining: false,
+            },
+            {
+                method: this.patternClass.bind(this),
+                stopChaining: true,
+            },
+            {
+                method: this.patternChild.bind(this),
+                stopChaining: true,
+            },
+        ];
+
+        this.stopPropagation = false;
+    }
+
     _getNodeString(selectors, node) {
 
-        let str = node.tagName.toLowerCase();
+        let str = '';
 
-        const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === str);
+        for (let rule of this.selectorPatterns) {
+            const ruleStr = rule.method(node);
+            ruleStr !== false && (str += ruleStr);
 
-        if (str !== 'body' && childrenTags.length > 1) {
-            const index = [...node.parentNode.children].indexOf(node);
-            str += `:nth-child(${index + 1})`;
+            if ((ruleStr !== false && rule.stopChaining) || this.stopPropagation) {
+                break;
+            }
         }
 
-        selectors.push(str);
+        str !== '' && selectors.push(str);
 
-        if(str !== 'body') {
-            this._getNodeString(selectors, node.parentNode)
-        }
+        !this.stopPropagation && this._getNodeString(selectors, node.parentNode);
     }
 
     getQuerySelector(node) {
 
-        const selectors = [
-            `${node.tagName.toLowerCase()}[type="${node.type}"]`
-        ];
+        const selectors = [];
 
-        this._getNodeString(selectors, node.parentNode);
+        this._getNodeString(selectors, node);
 
         return selectors.reverse().join(' > ');
+    }
+
+    patternId(node) {
+        const id = node.id;
+
+        if (typeof id === 'string' && id !== '') {
+            this.stopPropagation = true;
+
+            return `#${id}`;
+        }
+
+        return false;
+    }
+
+    patternTagName(node) {
+        const tag = node.tagName.toLowerCase();
+
+        (tag === 'body') && (this.stopPropagation = true);
+
+        return tag;
+    }
+
+    patternClass(node) {
+        const classList = Array.from(node.classList);
+
+        if (classList.length > 0) {
+            const classStr = `.${classList.join('.')}`;
+
+            return (node.parentNode && Array.from(node.parentNode.querySelectorAll(classStr)).length === 1) ? classStr : false;
+        }
+
+        return false;
+    }
+
+    patternChild(node) {
+        const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase());
+
+        if (childrenTags.length > 1) {
+            const index = [...node.parentNode.children].indexOf(node);
+            return `:nth-child(${index + 1})`;
+        }
+
+        return false;
     }
 }
 
