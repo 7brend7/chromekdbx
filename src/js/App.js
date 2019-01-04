@@ -1,12 +1,16 @@
 import databaseManager from './DatabaseManager';
 import {
-    MSG_BEFORE_UNLOAD,
+    MSG_SET_DATA,
     MSG_FORM_DATA_RECEIVED,
     MSG_GET_FORM_DATA,
     MSG_SAVE_PASS,
     NAME_REGEXP,
     PASSWD_REGEXP,
     MSG_GET_PASSWORD,
+    MSG_GET_ALL_PASSWORD,
+    MSG_CLEAR,
+    MSG_DELETE_PASSWORD,
+    MSG_DOWNLOAD,
 } from "./constants";
 
 class App {
@@ -32,8 +36,12 @@ class App {
             switch (data.type) {
                 case MSG_GET_FORM_DATA: return this.getFormData(data, sender, sendResponse);
                 case MSG_SAVE_PASS: return this.savePassword(data, sender, sendResponse);
-                case MSG_BEFORE_UNLOAD: return this.beforeUnload(data, sender, sendResponse);
+                case MSG_SET_DATA: return this.setData(data, sender, sendResponse);
                 case MSG_GET_PASSWORD: return this.getPasword(data, sender, sendResponse);
+                case MSG_GET_ALL_PASSWORD: return this.getAllPassword(data, sender, sendResponse);
+                case MSG_CLEAR: return this.clear(data, sender, sendResponse);
+                case MSG_DELETE_PASSWORD: return this.deletePassword(data, sender, sendResponse);
+                case MSG_DOWNLOAD: return this.download(data, sender, sendResponse);
             }
         });
     }
@@ -63,7 +71,7 @@ class App {
                 }
             }
 
-            if (Object.keys(loginForm).length === 2) {
+            if (Object.keys(loginForm).length === 2 && !this.data[details.tabId].custom) {
                 chrome.tabs.get(details.tabId, tab => {
 
                     const url = new URL(tab.url);
@@ -106,15 +114,30 @@ class App {
 
             pageData.meta = JSON.stringify(pageData.meta);
 
-            databaseManager.addItem(pageData);
-            delete this.data[sender.tab.id];
+            const xhr = new XMLHttpRequest();
+            xhr.open( "GET", sender.tab.favIconUrl, true );
+            xhr.responseType = 'arraybuffer';
+            xhr.onload = ( e )  => {
+                databaseManager.addIcon(xhr.response).then(id => {
+                    pageData.icon = id;
+                    databaseManager.addItem(pageData);
+                    delete this.data[sender.tab.id];
+                });
+            };
+            xhr.onerror = () => {
+                databaseManager.addItem(pageData);
+                delete this.data[sender.tab.id];
+            };
+            xhr.send();
         }
     }
 
-    beforeUnload(data, sender, sendResponse) {
+    setData(data, sender, sendResponse) {
+        delete data.type;
+
         this.data[sender.tab.id] = {
             ...this.data[sender.tab.id],
-            inputs: data.inputs,
+            ...data,
         }
     }
 
@@ -131,6 +154,34 @@ class App {
                     }
                 }));
             }
+        });
+
+        return true;
+    }
+
+    getAllPassword(data, sender, sendResponse) {
+        databaseManager.getAll().then(data => sendResponse(data));
+        return true;
+    }
+
+    clear(data, sender, sendResponse) {
+        if (this.data[sender.tab.id]) {
+            delete this.data[sender.tab.id];
+        }
+    }
+
+    deletePassword(data, sender, sendResponse) {
+        databaseManager.deleteItem(data.id).then(() => {
+            databaseManager.getAll().then(data => sendResponse(data));
+        });
+
+        return true;
+    }
+
+    download(data, sender, sendResponse) {
+        databaseManager.reset();
+        databaseManager.getBinary().then(db => {
+            sendResponse(URL.createObjectURL(new Blob([db], {type: data.blobType})));
         });
 
         return true;

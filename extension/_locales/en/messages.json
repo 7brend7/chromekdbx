@@ -14,5 +14,8 @@
     "startForm_ready_to_download": {"message": "You can download database by clicking <a href='#' data-type='download'>here</a>,<br>or clear all and start from <a href='#' data-type='clear'>scratch</a> ;)"},
     "savePopup_title": {"message": "Do you want to save <b>{{url}}</b> password to kdbx?"},
     "savePopup_btn_cancel": {"message": "Cancel"},
-    "savePopup_btn_save": {"message": "Save"}
+    "savePopup_btn_save": {"message": "Save"},
+    "popup_logo_text": {"message": "<i>Chrome</i> kdbx"},
+    "popup_empty_list": {"message": "You don't have any passwords stored, go ahead and add a new one"},
+    "popup_download_text": {"message": "download kdbx file"}
 }

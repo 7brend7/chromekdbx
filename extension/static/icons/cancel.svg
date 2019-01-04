@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?><!-- Generator: Gravit.io -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate"
+     viewBox="0 0 1000 1000" width="100%" height="100%">
+    <defs>
+        <clipPath id="_clipPath_G1aU7N09FtBRpEy7ftDyY10wfLYVbbF3">
+            <rect width="1000" height="1000"/>
+        </clipPath>
+    </defs>
+    <g clip-path="url(#_clipPath_G1aU7N09FtBRpEy7ftDyY10wfLYVbbF3)">
+        <g>
+            <path d=" M 500 10 C 229.4 10 10 229.4 10 500 C 10 770.6 229.4 990 500 990 C 770.6 990 990 770.6 990 500 C 990 229.4 770.6 10 500 10 Z  M 132.5 500 C 132.5 420.7 158 347.4 200.8 287.3 L 712.6 799.1 C 652.6 842 579.3 867.5 500 867.5 C 297.3 867.5 132.5 702.7 132.5 500 Z  M 799.2 712.7 L 287.3 200.8 C 347.4 157.9 420.7 132.5 500 132.5 C 702.7 132.5 867.5 297.3 867.5 500 C 867.5 579.3 842 652.6 799.2 712.7 Z "
+                  fill="rgb(210,62,48)"/>
+        </g>
+    </g>
+</svg>

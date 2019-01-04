@@ -78,6 +78,15 @@ class DatabaseManager {
         return group ? group : db.createGroup(defaultGroup, 'chromekdbx');
     }
 
+    async addIcon(data) {
+        const db = await this.db;
+        const uuid = kdbxweb.KdbxUuid.random();
+
+        db.meta.customIcons[uuid] = data;
+
+        return uuid;
+    }
+
     async addItem(data) {
         const db = await this.db;
         const group = await this.getChromekdbxGroup();
@@ -88,6 +97,7 @@ class DatabaseManager {
         entry._setField('URL', data.url, db.meta.memoryProtection.url);
         entry._setField('Title', data.title);
         entry._setField('chrome_kdbx', data.meta, true);
+        typeof data.icon !== 'undefined' && (entry.customIcon = data.icon);
 
         await this.saveDb();
     }
@@ -99,6 +109,35 @@ class DatabaseManager {
             const url = new URL(entry.fields.URL);
             return url.host === host;
         })
+    }
+
+    async getAll() {
+        const db = await this.db;
+        const group = await this.getChromekdbxGroup();
+
+        return group.entries.map(entry => {
+            const { UserName, URL } = entry.fields;
+            let icon = entry.customIcon ? new Blob([db.meta.customIcons[entry.customIcon.id]], {type: 'image/x-icon'}) : null;
+            if (icon) {
+                icon = window.URL.createObjectURL(icon);
+            }
+            else {
+                // TODO: some default icon here
+            }
+
+            return {
+                name: UserName,
+                url: URL,
+                id: entry.uuid.id,
+                icon
+            };
+        })
+    }
+
+    async deleteItem(id) {
+        const group = await this.getChromekdbxGroup();
+        group.entries = group.entries.filter(item => item.uuid.id !== id);
+        await this.saveDb();
     }
 }
 

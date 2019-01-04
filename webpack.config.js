@@ -9,7 +9,8 @@ const jsConf = {
     devtool: 'cheap-module-source-map',
     entry: {
         background: './src/js/App.js',
-        start: './src/js/start.js',
+        start: './src/js/pages/start.js',
+        popup: './src/js/pages/popup.js',
         'content-script': './src/js/ContentScript/ContentScript.js'
     },
     output: {
@@ -42,7 +43,11 @@ const jsConf = {
                         attrs: [':data-src']
                     }
                 }
-            }
+            },
+            {
+                test: /\.svg$/,
+                loader: 'vue-svg-loader',
+            },
         ]
     },
     resolve: {
@@ -63,7 +68,8 @@ const cssConf = {
     mode: 'development',
     devtool: 'cheap-module-source-map',
     entry: {
-        start: './src/scss/start.scss'
+        start: './src/scss/start.scss',
+        popup: './src/scss/popup.scss'
     },
     output: {
         path: path.join(__dirname, '/extension/static/css/'),

@@ -9,8 +9,9 @@ import {getTranslation, template} from "../utils";
 import savePoppup from "../components/SavePopup.html";
 
 class SavePopup {
-    show(data, saveHandler) {
+    show(data, saveHandler, cancelHandler) {
         this.saveHandler = saveHandler;
+        this.cancelHandler = cancelHandler;
 
         document.body.insertAdjacentHTML('beforeend', template(savePoppup, {
             baseUrl: chrome.runtime.getURL(''),
@@ -43,6 +44,7 @@ class SavePopup {
             switch(e.target.dataset.type) {
                 case 'close':
                     this.closeSavePopup();
+                    typeof this.cancelHandler === 'function' && (this.cancelHandler());
                     break;
                 case 'save':
                     this.savePassword();

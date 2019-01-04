@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "watch": "webpack --watch --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -25,6 +26,7 @@
     "sass-loader": "^7.1.0",
     "vue": "^2.5.17",
     "vue-loader": "^15.4.2",
+    "vue-svg-loader": "^0.11.0",
     "vue-template-compiler": "^2.5.17",
     "webpack": "^4.25.1",
     "webpack-fix-style-only-entries": "0.0.5"
