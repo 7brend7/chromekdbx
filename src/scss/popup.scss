@@ -35,6 +35,7 @@ main {
     border-radius: 4px;
     padding: 0;
 
+
     &::-webkit-scrollbar {
         width: 5px;
     }
@@ -53,12 +54,26 @@ main {
         border-bottom: 1px solid $popupShadowColor;
         display: flex;
         align-items: center;
+
+        &.popup-passwordItem_transitionOn {
+            transition: all .75s ease;
+        }
     }
+}
+
+.popup-password-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
 }
 
 .popup-icon {
     width: 15px;
     height: 15px;
+}
+
+.popup-urlIcon {
+    cursor: pointer;
+    margin-left: auto;
 }
 
 .popup-deleteIcon {
@@ -83,8 +98,9 @@ main {
 .popup-UrlLink {
     white-space: nowrap;
     text-overflow: ellipsis;
-    width: calc(100% - 50px);
+    width: calc(100% - 80px);
     overflow: hidden;
+    cursor: default;
 }
 
 .popup-emptyMsg {

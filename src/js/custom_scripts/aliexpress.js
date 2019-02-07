@@ -10,6 +10,6 @@ export default {
     fieldsHost: 'passport.aliexpress.com',
     fields: {
         name: '#fm-login-id',
-        password: '#fm-login-password'
-    }
-}
+        password: '#fm-login-password',
+    },
+};

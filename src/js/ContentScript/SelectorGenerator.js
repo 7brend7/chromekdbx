@@ -28,14 +28,14 @@ class SelectorGenerator {
             },
         ];
 
-        this.stopPropagation = false;
+        this.reset();
     }
 
     _getNodeString(selectors, node) {
-
         let str = '';
 
-        for (let rule of this.selectorPatterns) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const rule of this.selectorPatterns) {
             const ruleStr = rule.method(node);
             ruleStr !== false && (str += ruleStr);
 
@@ -49,7 +49,12 @@ class SelectorGenerator {
         !this.stopPropagation && this._getNodeString(selectors, node.parentNode);
     }
 
+    reset() {
+        this.stopPropagation = false;
+    }
+
     getQuerySelector(node) {
+        this.reset();
 
         const selectors = [];
 
@@ -59,7 +64,7 @@ class SelectorGenerator {
     }
 
     patternId(node) {
-        const id = node.id;
+        const { id } = node;
 
         if (typeof id === 'string' && id !== '') {
             this.stopPropagation = true;
@@ -100,6 +105,7 @@ class SelectorGenerator {
 
         return false;
     }
+
 }
 
-export default new SelectorGenerator()
+export default new SelectorGenerator();

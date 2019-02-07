@@ -17,11 +17,11 @@ class StorageManager {
 
     async initDb() {
         try {
-            this.db = await idb.open(this.dbName, 1, upgradeDb => {
+            this.db = await idb.open(this.dbName, 1, (upgradeDb) => {
                 upgradeDb.createObjectStore(this.dbStorageName, { autoIncrement: true });
             });
-        }
-        catch (e) {
+        } catch (e) {
+            // eslint-disable-next-line no-console
             console.log(e);
         }
     }
@@ -29,19 +29,25 @@ class StorageManager {
     getStore() {
         const tx = this.db.transaction(this.dbStorageName, 'readwrite');
         return {
-            tx: tx,
-            store: tx.objectStore(this.dbStorageName)
+            tx,
+            store: tx.objectStore(this.dbStorageName),
         };
     }
 
-    async generateName(name) {
-        const hash = await window.crypto.subtle.digest({name: 'SHA-1',}, (new TextEncoder()).encode(`crome${name}kdbx`));
+    /**
+     * @deprecated
+     *
+     * @param name
+     * @returns {Promise<string>}
+     */
+    static async generateName(name) {
+        const hash = await window.crypto.subtle.digest({ name: 'SHA-1' }, (new TextEncoder()).encode(`crome${name}kdbx`));
         const hashArray = Array.from(new Uint8Array(hash));
-        return hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+        return hashArray.map(b => (`00${b.toString(16)}`).slice(-2)).join('');
     }
 
     async deleteItem(key) {
-        return await this.setItem(key, null);
+        await this.setItem(key, null);
     }
 
     async setItem(key, value) {
@@ -49,16 +55,15 @@ class StorageManager {
             await this.initDb();
         }
 
-        //const name = await this.generateName(key);
+        // const name = await this.generateName(key);
 
         const { tx, store } = this.getStore();
         if (value === null) {
             await store.delete(key);
-        }
-        else {
+        } else {
             await store.put(value, key);
         }
-        return await tx.complete;
+        return tx.complete;
     }
 
     async getItem(key) {
@@ -66,11 +71,12 @@ class StorageManager {
             await this.initDb();
         }
 
-        //const name = await this.generateName(key);
+        // const name = await this.generateName(key);
 
         const { store } = this.getStore();
-        return await store.get(key);
+        return store.get(key);
     }
+
 }
 
 export default new StorageManager();

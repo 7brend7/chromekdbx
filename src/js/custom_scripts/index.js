@@ -8,5 +8,5 @@
 import aliexpress from './aliexpress';
 
 export default [
-    aliexpress
+    aliexpress,
 ];

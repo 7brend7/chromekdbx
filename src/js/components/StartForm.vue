@@ -4,48 +4,49 @@
             <div class="startForm--logo">
                 <img src="/static/img/Logoedit.webp" alt="logo">
             </div>
-            <div class="startForm--divider"></div>
+            <div class="startForm--divider" />
             <div class="startForm--form">
                 <div class="startForm--formAlign">
                     <span v-if="isReady">
-                        <label class="startForm--readyToStartLbl">{{getMsg('startForm_ready_to_start')}}</label>
-                        <p class="startForm--readyToStartMessage">{{getMsg('startForm_ready_to_message')}}</p>
-                        <p @click.prevent="readyToStartHandler" v-html="getMsg('startForm_ready_to_download')"></p>
+                        <label class="startForm--readyToStartLbl">{{ getMsg('startForm_ready_to_start') }}</label>
+                        <p class="startForm--readyToStartMessage">{{ getMsg('startForm_ready_to_message') }}</p>
+                        <p @click.prevent="readyToStartHandler" v-html="getMsg('startForm_ready_to_download')" />
 
-                        <button class="startForm--closeBtn" type="button" @click="close">{{getMsg('startForm_close')}}</button>
+                        <button class="startForm--closeBtn" type="button" @click="close">
+                            {{ getMsg('startForm_close') }}
+                        </button>
                     </span>
                     <span v-else>
                         <span v-if="!isNewDb">
-                            <label>{{getMsg('startForm_choose_db')}}</label>
+                            <label>{{ getMsg('startForm_choose_db') }}</label>
 
                             <label class="startForm--formFileContainer">
-                                <input type="text" :placeholder="getMsg('startForm_file_placeholder')" v-model="fileName" :class="[{'error': checkError('db')}]"/>
-                                <input type="file" @change="processFile($event)"/>
+                                <input v-model="fileName" type="text" :placeholder="getMsg('startForm_file_placeholder')" :class="[{'error': checkError('db')}]">
+                                <input type="file" @change="processFile($event)">
                             </label>
 
                             <label class="startForm--formFileContainerNote">
-                                {{getMsg('startForm_dont_have_such')}} <a href="#" @click.prevent="switchDb(true)">{{getMsg('startForm_click_here')}}</a>.
+                                {{ getMsg('startForm_dont_have_such') }} <a href="#" @click.prevent="switchDb(true)">{{ getMsg('startForm_click_here') }}</a>.
                             </label>
                         </span>
 
                         <span v-else>
-                            <span v-html="getMsg('startForm_create_db_intro')"></span>
+                            <span v-html="getMsg('startForm_create_db_intro')" />
                             <label class="startForm--formFileContainerNote">
-                                {{getMsg('startForm_still_open_db')}} <a href="#" @click.prevent="switchDb(false)">{{getMsg('startForm_click_here')}}</a>.
+                                {{ getMsg('startForm_still_open_db') }} <a href="#" @click.prevent="switchDb(false)">{{ getMsg('startForm_click_here') }}</a>.
                             </label>
                         </span>
 
-                        <div class="startForm--divider-H"></div>
+                        <div class="startForm--divider-H" />
 
-                        <label>{{getMsg('startForm_password')}}</label>
-                        <input v-model="password" type="password" :class="[{'error': checkError('password')}]"/>
+                        <label>{{ getMsg('startForm_password') }}</label>
+                        <input v-model="password" type="password" :class="[{'error': checkError('password')}]">
 
-                        <label v-if="isNewDb">{{getMsg('startForm_repeat_password')}}</label>
-                        <input v-if="isNewDb" v-model="re_password" type="password" :class="[{'error': checkError('re_password')}]"/>
+                        <label v-if="isNewDb">{{ getMsg('startForm_repeat_password') }}</label>
+                        <input v-if="isNewDb" v-model="re_password" type="password" :class="[{'error': checkError('re_password')}]">
 
-                        <button class="startForm--formFileContainerContinueBtn" type="button" @click="submit">{{getMsg('startForm_continue')}}</button>
+                        <button class="startForm--formFileContainerContinueBtn" type="button" @click="submit">{{ getMsg('startForm_continue') }}</button>
                     </span>
-
                 </div>
             </div>
         </div>
@@ -55,7 +56,7 @@
 <script>
     import kdbxweb from 'kdbxweb';
     import databaseManager from '../DatabaseManager';
-    import passwordManager from '../PasswordManager';
+    import PasswordManager from '../PasswordManager';
 
     import TranslationMixin from './TranslationMixin';
 
@@ -71,73 +72,72 @@
                 isReady: false,
 
                 db: null,
-                errors: {}
-            }
+                errors: {},
+            };
         },
-        created: function () {
+        created() {
             this.isReady = localStorage.getItem('startFormPassed') || false;
         },
         methods: {
-            checkError: function (name) {
-                return typeof this.errors[name] != 'undefined';
+            checkError(name) {
+                return typeof this.errors[name] !== 'undefined';
             },
-            switchDb: function (isNewDb) {
+            switchDb(isNewDb) {
                 this.errors = {};
                 this.isNewDb = isNewDb;
             },
-            validate: function () {
+            validate() {
                 this.errors = {};
-                let validationFields = this.isNewDb ? ['password', 're_password'] : ['db', 'password'];
+                const validationFields = this.isNewDb ? ['password', 're_password'] : ['db', 'password'];
 
-                for (let value of validationFields) {
+                validationFields.forEach((value) => {
                     if (!this[value]) {
                         this.errors[value] = true;
                     }
-                }
+                });
 
-                this.isNewDb && this.password !== this.re_password && (this.errors['re_password'] = true);
+                this.isNewDb && this.password !== this.re_password && (this.errors.re_password = true);
 
-                return Object.keys(this.errors).length == 0;
+                return Object.keys(this.errors).length === 0;
             },
-            readyToStartHandler: function(e) {
+            readyToStartHandler(e) {
                 if (e.target.tagName.toLowerCase() === 'a') {
                     switch (e.target.dataset.type) {
                         case 'download': this.downloadDb(); break;
                         case 'clear': this.clearAll(); break;
+                        default: break;
                     }
                 }
             },
-            downloadDb: function() {
+            downloadDb() {
                 databaseManager.reset();
-                databaseManager.getBinary().then(data => {
-                    const blob = new Blob([data], {type: "application/octet-stream"});
+                databaseManager.getBinary().then((data) => {
+                    const blob = new Blob([data], { type: 'application/octet-stream' });
                     const link = document.createElement('a');
                     link.href = window.URL.createObjectURL(blob);
                     link.download = 'chromeKdbxDb.kdbx';
                     link.click();
                 });
             },
-            clearAll: function() {
-                passwordManager.clear();
+            clearAll() {
+                PasswordManager.clear();
                 databaseManager.clear();
                 localStorage.removeItem('startFormPassed');
                 this.isReady = false;
             },
-            processDbManager: async function(credentials) {
+            async processDbManager(credentials) {
                 return new Promise((res, rej) => {
                     if (this.isNewDb) {
                         res(databaseManager.initNew(credentials));
-                    }
-                    else {
+                    } else {
                         const reader = new FileReader();
-                        reader.onload = async function () {
+                        reader.onload = async function loadFunc() {
                             try {
                                 const arrayBuffer = this.result;
                                 await databaseManager.initExisted(arrayBuffer, credentials);
                                 await databaseManager.saveDb();
                                 res();
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 rej(e);
                             }
                         };
@@ -146,34 +146,34 @@
                     }
                 });
             },
-            submit: function () {
+            submit() {
                 if (!this.validate()) {
                     return;
                 }
 
-                passwordManager.set(this.password).then(passwd => {
+                PasswordManager.set(this.password).then((passwd) => {
                     const credentials = new kdbxweb.Credentials(passwd, null);
 
                     this.processDbManager(credentials)
                         .then(() => {
+                            // eslint-disable-next-line no-console
                             console.log('end');
                             localStorage.setItem('startFormPassed', '1');
                             this.isReady = true;
                         })
-                        .catch((err) => {
+                        .catch(() => {
                             this.password = null;
-                            this.errors['password'] = true;
+                            this.errors.password = true;
                         });
-
                 });
             },
-            processFile: function () {
-                this.db = event.target.files[0];
+            processFile(e) {
+                [this.db] = e.target.files;
                 this.fileName = this.db.name;
             },
-            close: function() {
+            close() {
                 window.close();
-            }
-        }
-    }
+            },
+        },
+    };
 </script>

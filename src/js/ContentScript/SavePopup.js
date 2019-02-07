@@ -5,19 +5,25 @@
  * Time: 15:07
  */
 
-import {getTranslation, template} from "../utils";
-import savePoppup from "../components/SavePopup.html";
+import { getTranslation, template } from '../utils';
+import savePoppup from '../components/SavePopup.html';
 
 class SavePopup {
-    show(data, saveHandler, cancelHandler) {
+
+    /**
+     * @param {PageItem} pageItem
+     * @param {function} saveHandler
+     * @param {function} cancelHandler
+     */
+    show(pageItem, saveHandler, cancelHandler) {
         this.saveHandler = saveHandler;
         this.cancelHandler = cancelHandler;
 
         document.body.insertAdjacentHTML('beforeend', template(savePoppup, {
             baseUrl: chrome.runtime.getURL(''),
-            title: template(getTranslation('savePopup_title'), {url: window.location.host}),
+            title: template(getTranslation('savePopup_title'), { url: window.location.host }),
             btn_cancel: getTranslation('savePopup_btn_cancel'),
-            btn_save: getTranslation('savePopup_btn_save')
+            btn_save: getTranslation('savePopup_btn_save'),
         }));
 
         // Animation
@@ -31,7 +37,7 @@ class SavePopup {
 
     closeSavePopup() {
         document.getElementById('chromekdbxSavePopup').classList.remove('chromekdbx-visible');
-        setTimeout(() => {document.getElementById('chromekdbxSavePopup').remove();}, 300);
+        setTimeout(() => { document.getElementById('chromekdbxSavePopup').remove(); }, 300);
     }
 
     savePassword() {
@@ -41,7 +47,7 @@ class SavePopup {
 
     popupClickListener(e) {
         if (e.target.type === 'button') {
-            switch(e.target.dataset.type) {
+            switch (e.target.dataset.type) {
                 case 'close':
                     this.closeSavePopup();
                     typeof this.cancelHandler === 'function' && (this.cancelHandler());
@@ -49,9 +55,11 @@ class SavePopup {
                 case 'save':
                     this.savePassword();
                     break;
+                default: break;
             }
         }
     }
+
 }
 
-export default new SavePopup()
+export default new SavePopup();

@@ -1,22 +1,30 @@
 import databaseManager from './DatabaseManager';
+
+/* eslint-disable no-unused-vars */
 import {
-    MSG_SET_DATA,
     MSG_FORM_DATA_RECEIVED,
-    MSG_GET_FORM_DATA,
-    MSG_SAVE_PASS,
     NAME_REGEXP,
     PASSWD_REGEXP,
+    MSG_GET_FORM_DATA,
+    MSG_SAVE_PASS,
     MSG_GET_PASSWORD,
     MSG_GET_ALL_PASSWORD,
     MSG_CLEAR,
     MSG_DELETE_PASSWORD,
     MSG_DOWNLOAD,
-} from "./constants";
+    MSG_SET_CUSTOM,
+    MSG_SET_CUSTOM_CONTENT,
+    MSG_SET_SELECTORS,
+} from './constants';
+/* eslint-enable */
+
+import PageItem from './PageItem';
 
 class App {
 
     constructor() {
         this.data = {};
+        this.pageFields = {};
 
         this.initListeners();
     }
@@ -28,151 +36,156 @@ class App {
 
         webRequest.onBeforeRequest.addListener(
             this.onBeforeRequest.bind(this),
-            {urls: ["<all_urls>"]},
-            ["requestBody"]
+            { urls: ['<all_urls>'] },
+            ['requestBody'],
         );
 
         chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
-            switch (data.type) {
-                case MSG_GET_FORM_DATA: return this.getFormData(data, sender, sendResponse);
-                case MSG_SAVE_PASS: return this.savePassword(data, sender, sendResponse);
-                case MSG_SET_DATA: return this.setData(data, sender, sendResponse);
-                case MSG_GET_PASSWORD: return this.getPasword(data, sender, sendResponse);
-                case MSG_GET_ALL_PASSWORD: return this.getAllPassword(data, sender, sendResponse);
-                case MSG_CLEAR: return this.clear(data, sender, sendResponse);
-                case MSG_DELETE_PASSWORD: return this.deletePassword(data, sender, sendResponse);
-                case MSG_DOWNLOAD: return this.download(data, sender, sendResponse);
-            }
+            const funcName = data.type.replace(/^MSG_/, '').toLowerCase().replace(/(_[a-z])/g, (match, p1) => p1.replace('_', '').toUpperCase());
+            return (typeof this[funcName] === 'function') ? this[funcName](data, sender, sendResponse) : null;
         });
     }
 
     onInstalled() {
-        const url_string = chrome.extension.getURL('views/start.html');
-        chrome.tabs.create({active: true, url: url_string});
+        const urlString = chrome.extension.getURL('views/start.html');
+        chrome.tabs.create({ active: true, url: urlString });
     }
 
     onBeforeRequest(details) {
-
         const methodsToCheck = ['POST', 'PUT'];
 
         if (methodsToCheck.includes(details.method) && details.requestBody) {
-            const {formData} = details.requestBody;
+            const { formData } = details.requestBody;
 
-            let loginForm = {};
+            const loginForm = {};
 
             if (formData) {
-                for (let name in formData) {
+                formData.forEach((name) => {
                     if (NAME_REGEXP.test(name)) {
-                        loginForm.name = formData[name][0];
+                        [loginForm.name] = formData[name];
                     }
                     if (PASSWD_REGEXP.test(name)) {
-                        loginForm.password = formData[name][0];
+                        [loginForm.password] = formData[name];
                     }
-                }
+                });
             }
 
-            if (Object.keys(loginForm).length === 2 && !this.data[details.tabId].custom) {
-                chrome.tabs.get(details.tabId, tab => {
+            const pageItem = this.getPageItem(details.tabId);
 
+            if (Object.keys(loginForm).length === 2 && !pageItem.isCustom()) {
+                chrome.tabs.get(details.tabId, (tab) => {
                     const url = new URL(tab.url);
 
-                    this.data[details.tabId] = {
-                        ...this.data[details.tabId],
-                        url: url.origin + url.pathname,
-                        title: tab.title,
-                        ...loginForm
-                    };
+                    pageItem
+                        .setName(loginForm.name)
+                        .setPassword(loginForm.password)
+                        .setUrl(url.origin + url.pathname)
+                        .setTitle(tab.title);
 
-                    chrome.tabs.sendMessage(details.tabId, {type: MSG_FORM_DATA_RECEIVED}, () => {});
+                    this.checkPasswordExist(pageItem).then((exist) => {
+                        !exist && chrome.tabs.sendMessage(details.tabId, { type: MSG_FORM_DATA_RECEIVED });
+                    });
                 });
             }
         }
+    }
+
+    /**
+     * @param {PageItem} pageItem
+     * @returns {Promise<boolean>}
+     */
+    checkPasswordExist(pageItem) {
+        return new Promise((res) => {
+            this.getPasword({ url: pageItem.getUrl() }, null, (items) => {
+                res(items.filter(item => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0);
+            });
+        });
+    }
+
+    /**
+     * @param tabId
+     * @returns {PageItem}
+     */
+    getPageItem(tabId) {
+        !this.data[tabId] && (this.data[tabId] = new PageItem());
+
+        return this.data[tabId];
+    }
+
+    clearPageItem(tabId) {
+        this.data[tabId] && (delete this.data[tabId]);
+        this.pageFields[tabId] && (delete this.pageFields[tabId]);
+    }
+
+    getPageFields(tabId) {
+        !this.pageFields[tabId] && (this.pageFields[tabId] = []);
+
+        return this.pageFields[tabId];
     }
 
     getFormData(data, sender, sendResponse) {
-        if (this.data[sender.tab.id] && typeof sendResponse === 'function') {
-            sendResponse(this.data[sender.tab.id]);
-        }
+        typeof sendResponse === 'function' && (sendResponse(this.getPageItem(sender.tab.id)));
     }
 
-    savePassword(data, sender, sendResponse) {
-        if (this.data[sender.tab.id] && typeof sendResponse === 'function') {
-            const pageData = this.data[sender.tab.id];
-            const { inputs } = pageData;
-            delete pageData.inputs;
-            pageData.meta = {};
+    savePass(data, sender, sendResponse) {
+        if (typeof sendResponse === 'function') {
+            const pageItem = this.getPageItem(sender.tab.id);
+            const pageFields = this.getPageFields(sender.tab.id);
 
-            inputs.forEach(item => {
-                if (item.value === pageData.name) {
-                    pageData.meta.nameSelector = item.selector;
-                }
+            const nameField = pageFields.find(item => item.value === pageItem.getName());
+            nameField && (pageItem.setMeta('nameSelector', nameField.selector));
 
-                if (item.value === pageData.password) {
-                    pageData.meta.passwordSelector = item.selector;
-                }
-            });
+            const passwordField = pageFields.find(item => item.value === pageItem.getPassword());
+            nameField && (pageItem.setMeta('passwordSelector', passwordField.selector));
 
-            pageData.meta = JSON.stringify(pageData.meta);
+            const addItem = () => {
+                databaseManager.addItem(pageItem);
+                this.clearPageItem(sender.tab.id);
+            };
 
             const xhr = new XMLHttpRequest();
-            xhr.open( "GET", sender.tab.favIconUrl, true );
+            xhr.open('GET', sender.tab.favIconUrl, true);
             xhr.responseType = 'arraybuffer';
-            xhr.onload = ( e )  => {
-                databaseManager.addIcon(xhr.response).then(id => {
-                    pageData.icon = id;
-                    databaseManager.addItem(pageData);
-                    delete this.data[sender.tab.id];
-                });
+            xhr.onload = async () => {
+                const id = await databaseManager.addIcon(xhr.response);
+                pageItem.setIcon(id);
+                addItem();
             };
             xhr.onerror = () => {
-                databaseManager.addItem(pageData);
-                delete this.data[sender.tab.id];
+                addItem();
             };
             xhr.send();
         }
     }
 
-    setData(data, sender, sendResponse) {
-        delete data.type;
-
-        this.data[sender.tab.id] = {
-            ...this.data[sender.tab.id],
-            ...data,
-        }
-    }
-
-    getPasword(data, sender, sendResponse) {
+    getPassword(data, sender, sendResponse) {
         const url = new URL(data.url);
-        databaseManager.findItemByHost(url.host).then(items => {
-            if (items.length > 0 && typeof sendResponse === 'function') {
-                sendResponse(items.map(item => {
-                    const { fields } = item;
-                    return {
-                        name: fields.UserName,
-                        password: fields.Password.getText(),
-                        selectors: JSON.parse(fields.chrome_kdbx.getText())
-                    }
-                }));
-            }
+        databaseManager.findItemByHost(url.host).then((items) => {
+            typeof sendResponse === 'function' && sendResponse(items.map((item) => {
+                const { fields } = item;
+                return {
+                    name: fields.UserName,
+                    password: fields.Password.getText(),
+                    selectors: JSON.parse(fields.chrome_kdbx.getText()),
+                };
+            }));
         });
 
         return true;
     }
 
     getAllPassword(data, sender, sendResponse) {
-        databaseManager.getAll().then(data => sendResponse(data));
+        databaseManager.getAll().then(allPasswords => sendResponse(allPasswords));
         return true;
     }
 
-    clear(data, sender, sendResponse) {
-        if (this.data[sender.tab.id]) {
-            delete this.data[sender.tab.id];
-        }
+    clear(data, sender) {
+        this.clearPageItem(sender.tab.id);
     }
 
     deletePassword(data, sender, sendResponse) {
         databaseManager.deleteItem(data.id).then(() => {
-            databaseManager.getAll().then(data => sendResponse(data));
+            databaseManager.getAll().then(allPasswords => sendResponse(allPasswords));
         });
 
         return true;
@@ -180,12 +193,33 @@ class App {
 
     download(data, sender, sendResponse) {
         databaseManager.reset();
-        databaseManager.getBinary().then(db => {
-            sendResponse(URL.createObjectURL(new Blob([db], {type: data.blobType})));
+        databaseManager.getBinary().then((db) => {
+            sendResponse(URL.createObjectURL(new Blob([db], { type: data.blobType })));
         });
 
         return true;
     }
+
+    setCustom(data, sender) {
+        this.getPageItem(sender.tab.id).setCustom(data.custom);
+    }
+
+    setCustomContent(data, sender) {
+        const pageItem = this.getPageItem(sender.tab.id);
+
+        pageItem
+            .setName(data.name)
+            .setPassword(data.password)
+            .setUrl(data.url)
+            .setTitle(data.title)
+            .setMeta('nameSelector', data.nameSelector)
+            .setMeta('passwordSelector', data.passwordSelector);
+    }
+
+    setSelectors(data, sender) {
+        this.getPageFields(sender.tab.id).push(...data.pageFields);
+    }
+
 }
 
 export default new App();

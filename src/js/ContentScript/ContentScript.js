@@ -11,9 +11,11 @@ import {
     MSG_SAVE_PASS,
     NAME_REGEXP,
     PASSWD_REGEXP,
-    MSG_SET_DATA,
     MSG_GET_PASSWORD,
     MSG_CLEAR,
+    MSG_SET_CUSTOM,
+    MSG_SET_CUSTOM_CONTENT,
+    MSG_SET_SELECTORS,
 } from '../constants';
 import customScripts from '../custom_scripts';
 import selectorGenerator from './SelectorGenerator';
@@ -22,7 +24,6 @@ import savePopup from './SavePopup';
 class ContentScript {
 
     constructor() {
-
         this.customScript = this.checkCustomScripts();
 
         this.checkPasswordField();
@@ -31,18 +32,19 @@ class ContentScript {
     }
 
     checkPasswordField() {
+        chrome.runtime.sendMessage({ type: MSG_GET_PASSWORD, url: document.location.href }, (data) => {
+            if (data.length > 0) {
+                const item = data[0]; // temporary take the first one
 
-        chrome.runtime.sendMessage({type: MSG_GET_PASSWORD, url: document.location.href}, (data) => {
-            const item = data[0]; // temporary take the first one
+                const { nameSelector, passwordSelector } = item.selectors;
 
-            const {nameSelector, passwordSelector} = item.selectors;
+                const nameField = document.querySelector(nameSelector);
+                const passwordField = document.querySelector(passwordSelector);
 
-            const nameField = document.querySelector(nameSelector);
-            const passwordField = document.querySelector(passwordSelector);
-
-            if (nameField && passwordField) {
-                nameField.value = item.name;
-                passwordField.value = item.password;
+                if (nameField && passwordField) {
+                    nameField.value = item.name;
+                    passwordField.value = item.password;
+                }
             }
         });
     }
@@ -53,13 +55,14 @@ class ContentScript {
                 case MSG_FORM_DATA_RECEIVED:
                     this.onFormDataReceived(data, sender, sendResponse);
                     break;
+                default: break;
             }
         });
 
-        window.addEventListener("beforeunload", this.beforeunload.bind(this));
+        window.addEventListener('beforeunload', this.beforeunload.bind(this));
 
         if (this.customScript) {
-            chrome.runtime.sendMessage({ type: MSG_SET_DATA, custom: true });
+            chrome.runtime.sendMessage({ type: MSG_SET_CUSTOM, custom: true });
 
             const nameFiled = document.querySelector(this.customScript.fields.name);
             const passwordFiled = document.querySelector(this.customScript.fields.password);
@@ -83,19 +86,17 @@ class ContentScript {
         }
     }
 
-    onFormDataReceived(data, sender, sendResponse) {
+    onFormDataReceived() {
         sessionStorage.setItem('reloading', '1');
     }
 
     showPopup() {
-        chrome.runtime.sendMessage({type: MSG_GET_FORM_DATA}, (data) => {
-            if (data) {
-                savePopup.show(data, () => {
-                    chrome.runtime.sendMessage({type: MSG_SAVE_PASS});
-                }, () => {
-                    chrome.runtime.sendMessage({type: MSG_CLEAR});
-                });
-            }
+        chrome.runtime.sendMessage({ type: MSG_GET_FORM_DATA }, (pageItem) => {
+            savePopup.show(pageItem, () => {
+                chrome.runtime.sendMessage({ type: MSG_SAVE_PASS });
+            }, () => {
+                chrome.runtime.sendMessage({ type: MSG_CLEAR });
+            });
         });
     }
 
@@ -106,27 +107,22 @@ class ContentScript {
             this.showPopup();
         }
 
-        return customScripts.find(item => {
+        return customScripts.find((item) => {
             const checkHost = item.fieldsHost || item.host;
 
-            return checkHost === url.host
+            return checkHost === url.host;
         });
     }
 
     beforeunloadCustom() {
         chrome.runtime.sendMessage({
-            type: MSG_SET_DATA,
+            type: MSG_SET_CUSTOM_CONTENT,
             name: this.customScript.name,
+            password: this.customScript.password,
             url: document.location.href,
             title: document.title,
-            password: this.customScript.password,
-            inputs: [{
-                value: this.customScript.name,
-                selector: this.customScript.fields.name
-            }, {
-                value: this.customScript.password,
-                selector: this.customScript.fields.password
-            }],
+            nameSelector: this.customScript.fields.name,
+            passwordSelector: this.customScript.fields.password,
         });
     }
 
@@ -136,25 +132,30 @@ class ContentScript {
             return true;
         }
 
-        const inputs = [];
+        const pageFields = [];
         [
             ...document.querySelectorAll("input[type='text']"),
             ...document.querySelectorAll("input[type='email']"),
             ...document.querySelectorAll("input[type='password']"),
-        ].forEach(item => {
+        ].forEach((item) => {
             if (NAME_REGEXP.test(item.name) || PASSWD_REGEXP.test(item.name)) {
-                inputs.push({
-                    name: item.name,
+                pageFields.push({
+                    selector: selectorGenerator.getQuerySelector(item),
                     value: item.value,
-                    selector: selectorGenerator.getQuerySelector(item)
                 });
             }
         });
 
-        if (Object.keys(inputs).length > 0) {
-            chrome.runtime.sendMessage({type: MSG_SET_DATA, inputs});
+        if (Object.keys(pageFields).length > 0) {
+            chrome.runtime.sendMessage({
+                type: MSG_SET_SELECTORS,
+                pageFields,
+            });
         }
+
+        return true;
     }
+
 }
 
-new ContentScript();
+new ContentScript(); // eslint-disable-line no-new

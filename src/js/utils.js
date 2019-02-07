@@ -5,12 +5,16 @@
  * Time: 11:37
  */
 
-export const getTranslation = (text) => chrome.i18n.getMessage(text);
+export const getTranslation = text => chrome.i18n.getMessage(text);
 
 export const template = (tpl, data) => {
-    let re = /{{([^}}]+)?}}/g, match;
-    while(match = re.exec(tpl)) {
-        tpl = tpl.replace(match[0], data[match[1]])
+    const re = /{{([^}}]+)?}}/g;
+    let match;
+    let result = tpl;
+
+    // eslint-disable-next-line no-cond-assign
+    while (match = re.exec(tpl)) {
+        result = result.replace(match[0], data[match[1]]);
     }
-    return tpl;
-}
+    return result;
+};

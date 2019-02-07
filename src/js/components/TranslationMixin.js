@@ -10,5 +10,6 @@ import { getTranslation } from '../utils';
 export default {
     methods: {
         getMsg: getTranslation,
-    }
-}
+    },
+
+};
