@@ -20,7 +20,7 @@ The project is opensource so fill free to comment and participate to it.
 
 ## Licence
 
-[MIT](https://github.com/LICENCE)
+[GPL 3.0.](https://github.com/7brend7/chromekdbx/blob/master/LICENSE)
 
 ## Author
 
