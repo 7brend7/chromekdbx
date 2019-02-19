@@ -38,6 +38,7 @@ Some research shows me that it's ok to store such data in local storage.
 - [ ] Implement kdbx import with merge (after installation case);
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
+- [ ] Remove icon after entry removed;
 
 ## Contributing
 The project is opensource so fill free to comment and participate to it.
@@ -49,3 +50,4 @@ The project is opensource so fill free to comment and participate to it.
 ## Author
 
 [7brend7](https://github.com/7brend7)
+

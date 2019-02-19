@@ -66,41 +66,28 @@ main {
     transform: translateY(30px);
 }
 
-.popup-icon {
+.popup-icon-svg {
     width: 15px;
     height: 15px;
 }
 
-.popup-urlIcon {
-    cursor: pointer;
-    margin-left: auto;
-}
-
-.popup-deleteIcon {
-    cursor: pointer;
-    margin-left: auto;
-}
-
-.popup-ConfirmIcon, .popup-CancelIcon {
-    cursor: pointer;
-}
-
-.popup-confirmIcons {
-    float: right;
-    display: flex;
-    margin-left: auto;
-}
-
-.popup-CancelIcon {
+.popup-icon {
     margin-left: 10px;
+    cursor: pointer;
+    font-size: 0;
+
+    svg {
+        width: 15px;
+        height: 15px;
+    }
 }
 
 .popup-UrlLink {
     white-space: nowrap;
     text-overflow: ellipsis;
-    width: calc(100% - 80px);
     overflow: hidden;
     cursor: default;
+    flex-grow: 1;
 }
 
 .popup-emptyMsg {

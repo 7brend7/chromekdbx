@@ -6,7 +6,7 @@ const FixStyleOnlyEntriesPlugin = require('webpack-fix-style-only-entries');
 
 const jsConf = {
     mode: 'development',
-    devtool: 'cheap-module-source-map',
+    devtool: 'cheap-module-eval-source-map',
     entry: {
         background: './src/js/App.js',
         start: './src/js/pages/start.js',

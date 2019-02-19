@@ -37,11 +37,6 @@ export default class PageItem {
      */
     #icon = null;
 
-    /**
-     * @type {boolean}
-     */
-    #isCustom = false;
-
     getName() {
         return this.#name;
     }
@@ -79,11 +74,6 @@ export default class PageItem {
         return this;
     }
 
-    setCustom(value) {
-        this.#isCustom = value;
-        return this;
-    }
-
     /**
      * @param {string} key
      * @param value
@@ -116,10 +106,6 @@ export default class PageItem {
         this.#icon && (entry.customIcon = this.#icon);
 
         /* eslint-enable */
-    }
-
-    isCustom() {
-        return this.#isCustom;
     }
 
 }

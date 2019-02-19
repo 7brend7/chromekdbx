@@ -11,11 +11,10 @@ import savePoppup from '../components/SavePopup.html';
 class SavePopup {
 
     /**
-     * @param {PageItem} pageItem
      * @param {function} saveHandler
      * @param {function} cancelHandler
      */
-    show(pageItem, saveHandler, cancelHandler) {
+    show(saveHandler, cancelHandler) {
         this.saveHandler = saveHandler;
         this.cancelHandler = cancelHandler;
 

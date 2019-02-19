@@ -12,18 +12,17 @@
                 <div :is="item.icon" v-else class="popup-favicon popup-defaultIcon" />
                 <span class="popup-UrlLink">{{ parseUrl(item.url) }}</span>
 
-                <div class="popup-urlIcon" @click.prevent="openPage(item.url)"><UrlIcon class="popup-icon" /></div>
-                <div v-if="forDelete[item.id]" class="popup-confirmIcons">
-                    <div class="popup-ConfirmIcon" @click.prevent="confirmDeleteItem(item.id)"><ConfirmIcon class="popup-icon" /></div>
-
-                    <div class="popup-CancelIcon" @click.prevent="cancelDeleteItem(item.id)"><CancelIcon class="popup-icon" /></div>
-                </div>
-                <div v-else class="popup-deleteIcon" @click.prevent="deleteItem(item.id)"><DeleteIcon class="popup-icon" /></div>
+                <a class="popup-icon" @click.prevent="openPage(item.url)"><UrlIcon /></a>
+                <template v-if="forDelete[item.id]">
+                    <a class="popup-icon" @click.prevent="confirmDeleteItem(item.id)"><ConfirmIcon /></a>
+                    <a class="popup-icon" @click.prevent="cancelDeleteItem(item.id)"><CancelIcon /></a>
+                </template>
+                <a v-else class="popup-icon" @click.prevent="deleteItem(item.id)"><DeleteIcon /></a>
             </li>
         </transition-group>
 
         <div class="popup-DownloadIcon">
-            <label @click.prevent="downloadDb"><DownloadIcon class="popup-icon" /> {{ getMsg('popup_download_text') }}</label>
+            <label @click.prevent="downloadDb"><DownloadIcon class="popup-icon-svg" /> {{ getMsg('popup_download_text') }}</label>
         </div>
     </main>
 </template>
