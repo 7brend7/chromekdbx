@@ -34,7 +34,7 @@ Some research shows me that it's ok to store such data in local storage.
 ## Todo
 
 - [ ] Typescript!
-- [ ] Use regexp in custom scripts;
+- [ ] Support multiple logins;
 - [ ] Implement kdbx import with merge (after installation case);
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
