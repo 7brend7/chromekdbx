@@ -5,9 +5,9 @@
  * Time: 11:37
  */
 
-export const getTranslation = text => chrome.i18n.getMessage(text);
+export const getTranslation = (text: string): string => chrome.i18n.getMessage(text);
 
-export const template = (tpl, data) => {
+export const template = (tpl: string, data: {[key: string]: string}): string => {
     const re = /{{([^}}]+)?}}/g;
     let match;
     let result = tpl;

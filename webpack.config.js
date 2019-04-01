@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -8,60 +7,61 @@ const jsConf = {
     mode: 'development',
     devtool: 'cheap-module-eval-source-map',
     entry: {
-        background: './src/js/App.js',
+        background: './src/js/App',
         start: './src/js/pages/start.js',
         popup: './src/js/pages/popup.js',
-        'content-script': './src/js/ContentScript/ContentScript.js'
+        'content-script': './src/js/ContentScript/ContentScript',
     },
     output: {
         path: path.join(__dirname, '/extension/static/js/'),
-        filename: '[name].js'
+        filename: '[name].js',
     },
     module: {
         rules: [
             {
-                test: /\.vue$/,
+                test: /\.vue(\.ts)?$/,
                 exclude: /node_modules/,
-                use: "vue-loader"
+                use: 'vue-loader',
             },
             {
-                test: /\.js$/,
+                test: /\.(ts|js)x?$/,
                 exclude: /node_modules/,
                 use: {
-                    loader: 'babel-loader',
+                    loader: 'ts-loader',
                     options: {
-                        presets: ['@babel/preset-env'],
-                        plugins: ['@babel/transform-runtime', ["@babel/plugin-proposal-class-properties", { "loose": false }],]
-                    }
-                }
+                        appendTsSuffixTo: [/\.vue$/],
+                    },
+                },
             },
             {
                 test: /\.(html)$/,
                 use: {
                     loader: 'html-loader',
                     options: {
-                        attrs: [':data-src']
-                    }
-                }
+                        attrs: [':data-src'],
+                    },
+                },
             },
             {
                 test: /\.svg$/,
                 loader: 'vue-svg-loader',
             },
-        ]
+        ],
     },
     resolve: {
         extensions: [
             '.js',
-            '.vue'
+            '.vue',
+            '.ts',
+            '.tsx',
         ],
         alias: {
-            vue: 'vue/dist/vue.js'
-        }
+            vue: 'vue/dist/vue.js',
+        },
     },
     plugins: [
-        new VueLoaderPlugin()
-    ]
+        new VueLoaderPlugin(),
+    ],
 };
 
 const cssConf = {
@@ -69,11 +69,11 @@ const cssConf = {
     devtool: 'cheap-module-source-map',
     entry: {
         start: './src/scss/start.scss',
-        popup: './src/scss/popup.scss'
+        popup: './src/scss/popup.scss',
     },
     output: {
         path: path.join(__dirname, '/extension/static/css/'),
-        filename: '[name].js'
+        filename: '[name].js',
     },
     module: {
         rules: [
@@ -82,15 +82,15 @@ const cssConf = {
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader',
-                    'sass-loader'
-                ]
-            }
-        ]
+                    'sass-loader',
+                ],
+            },
+        ],
     },
     plugins: [
         new FixStyleOnlyEntriesPlugin(),
         new MiniCssExtractPlugin({
-            filename: "[name].css"
+            filename: '[name].css',
         }),
     ],
 };

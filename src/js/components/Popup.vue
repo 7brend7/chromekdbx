@@ -1,3 +1,5 @@
+import PopupItem from "../Interfaces/PopupItem";
+
 <template>
     <main id="app" class="popup">
         <div class="popup-logo">
@@ -27,8 +29,9 @@
     </main>
 </template>
 
-<script>
+<script lang="ts">
 
+    import Component, { mixins } from 'vue-class-component';
     import TranslationMixin from './TranslationMixin';
     import { MSG_GET_ALL_PASSWORD, MSG_DELETE_PASSWORD, MSG_DOWNLOAD } from '../constants';
     import DeleteIcon from '../../../extension/static/icons/delete.svg';
@@ -37,25 +40,27 @@
     import DownloadIcon from '../../../extension/static/icons/download.svg';
     import KeyIcon from '../../../extension/static/icons/key.svg';
     import UrlIcon from '../../../extension/static/icons/url.svg';
+    import PopupItem from "../Interfaces/PopupItem";
 
-    export default {
+    @Component({
         components: {
             DeleteIcon,
             ConfirmIcon,
             CancelIcon,
             DownloadIcon,
             UrlIcon,
-        },
-        mixins: [TranslationMixin],
-        data() {
-            return {
-                passwords: [],
-                forDelete: {},
-            };
-        },
-        created() {
-            chrome.runtime.sendMessage({ type: MSG_GET_ALL_PASSWORD }, (data) => {
-                this.passwords = data.map((item) => {
+        }
+    })
+    export default class Popup extends mixins(TranslationMixin) {
+        passwords: PopupItem[] = [];
+
+        forDelete: {
+            [id: number]: boolean
+        } = {};
+
+        created(): void {
+            chrome.runtime.sendMessage({ type: MSG_GET_ALL_PASSWORD }, (data: PopupItem[]) => {
+                this.passwords = data.map((item: PopupItem) => {
                     const newItem = { ...item };
                     newItem.icon === null && (newItem.icon = KeyIcon);
                     return newItem;
@@ -63,38 +68,42 @@
                 // eslint-disable-next-line no-console
                 console.log(this.passwords);
             });
-        },
-        methods: {
-            parseUrl(url) {
-                const parsed = new URL(url);
-                return parsed.host;
-            },
-            openPage(host) {
-                chrome.tabs.create({ active: true, url: host });
-            },
-            deleteItem(id) {
-                this.forDelete = {
-                    ...this.forDelete,
-                    [id]: true,
-                };
-            },
-            confirmDeleteItem(id) {
-                chrome.runtime.sendMessage({ type: MSG_DELETE_PASSWORD, id }, (data) => {
-                    this.passwords = data;
-                });
-            },
-            cancelDeleteItem(id) {
-                delete this.forDelete[id];
-                this.forDelete = { ...this.forDelete };
-            },
-            downloadDb() {
-                chrome.runtime.sendMessage({ type: MSG_DOWNLOAD, blobType: 'application/octet-stream' }, (data) => {
-                    const link = document.createElement('a');
-                    link.href = data;
-                    link.download = 'chromeKdbxDb.kdbx';
-                    link.click();
-                });
-            },
-        },
+        }
+
+        parseUrl(url: string): string {
+            const parsed = new URL(url);
+            return parsed.host;
+        }
+
+        openPage(host: string): void {
+            chrome.tabs.create({ active: true, url: host });
+        }
+
+        deleteItem(id: number): void {
+            this.forDelete = {
+                ...this.forDelete,
+                [id]: true,
+            };
+        }
+
+        confirmDeleteItem(id: number): void {
+            chrome.runtime.sendMessage({ type: MSG_DELETE_PASSWORD, id }, (data: PopupItem[]) => {
+                this.passwords = data;
+            });
+        }
+
+        cancelDeleteItem(id: number): void {
+            delete this.forDelete[id];
+            this.forDelete = { ...this.forDelete };
+        }
+
+        downloadDb(): void {
+            chrome.runtime.sendMessage({ type: MSG_DOWNLOAD, blobType: 'application/octet-stream' }, (data: string) => {
+                const link = <HTMLAnchorElement>document.createElement('a');
+                link.href = data;
+                link.download = 'chromeKdbxDb.kdbx';
+                link.click();
+            });
+        }
     };
 </script>

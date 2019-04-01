@@ -8,13 +8,19 @@
 import { getTranslation, template } from '../utils';
 import savePoppup from '../components/SavePopup.html';
 
+const POPUP_SHOW_TIMEOUT = 100;
+const POPUP_CLOSE_TIMEOUT = 300;
+
 class SavePopup {
+
+    private saveHandler: () => void = this.defaultSaveHandler;
+    private cancelHandler: () => void = this.defaultCancelHandler;
 
     /**
      * @param {function} saveHandler
      * @param {function} cancelHandler
      */
-    show(saveHandler, cancelHandler) {
+    show(saveHandler: () => void, cancelHandler: () => void): void {
         this.saveHandler = saveHandler;
         this.cancelHandler = cancelHandler;
 
@@ -29,27 +35,37 @@ class SavePopup {
         setTimeout(() => {
             const elem = document.getElementById('chromekdbxSavePopup');
             elem && elem.classList.add('chromekdbx-visible');
-        }, 100);
+        }, POPUP_SHOW_TIMEOUT);
 
-        document.getElementById('chromekdbxSavePopup').addEventListener('click', this.popupClickListener.bind(this));
+        const chromekdbxSavePopup = document.getElementById('chromekdbxSavePopup');
+        chromekdbxSavePopup && chromekdbxSavePopup.addEventListener('click', this.popupClickListener.bind(this));
     }
 
-    closeSavePopup() {
-        document.getElementById('chromekdbxSavePopup').classList.remove('chromekdbx-visible');
-        setTimeout(() => { document.getElementById('chromekdbxSavePopup').remove(); }, 300);
+    closeSavePopup(): void {
+        const chromekdbxSavePopup = document.getElementById('chromekdbxSavePopup');
+
+        chromekdbxSavePopup && chromekdbxSavePopup.classList.remove('chromekdbx-visible');
+        setTimeout(() => {
+            chromekdbxSavePopup && chromekdbxSavePopup.remove();
+        }, POPUP_CLOSE_TIMEOUT);
     }
 
-    savePassword() {
-        typeof this.saveHandler === 'function' && (this.saveHandler());
+    defaultSaveHandler(): void {}
+
+    defaultCancelHandler(): void {}
+
+    savePassword(): void {
+        this.saveHandler();
         this.closeSavePopup();
     }
 
-    popupClickListener(e) {
-        if (e.target.type === 'button') {
-            switch (e.target.dataset.type) {
+    popupClickListener(e: MouseEvent): void {
+        const target = e.target as HTMLButtonElement;
+        if (target.type === 'button') {
+            switch (target.dataset.type) {
                 case 'close':
                     this.closeSavePopup();
-                    typeof this.cancelHandler === 'function' && (this.cancelHandler());
+                    this.cancelHandler();
                     break;
                 case 'save':
                     this.savePassword();

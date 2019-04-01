@@ -5,8 +5,18 @@
  * Time: 15:04
  */
 
+/**
+ * Generate string selector for node element
+ * Almost same as Devtool -> Copy selector
+ */
 class SelectorGenerator {
 
+    private readonly selectorPatterns: {
+        method: (node: Element) => false | string,
+        stopChaining: boolean,
+    }[];
+
+    private stopPropagation: boolean = false;
 
     constructor() {
         this.selectorPatterns = [
@@ -31,7 +41,7 @@ class SelectorGenerator {
         this.reset();
     }
 
-    _getNodeString(selectors, node) {
+    private getNodeString(selectors: string[], node: Element): void {
         let str = '';
 
         // eslint-disable-next-line no-restricted-syntax
@@ -46,24 +56,14 @@ class SelectorGenerator {
 
         str !== '' && selectors.push(str);
 
-        !this.stopPropagation && this._getNodeString(selectors, node.parentNode);
+        !this.stopPropagation && node.parentNode && this.getNodeString(selectors, node.parentNode as Element);
     }
 
-    reset() {
+    private reset() {
         this.stopPropagation = false;
     }
 
-    getQuerySelector(node) {
-        this.reset();
-
-        const selectors = [];
-
-        this._getNodeString(selectors, node);
-
-        return selectors.reverse().join(' > ');
-    }
-
-    patternId(node) {
+    private patternId(node: Element): false | string {
         const { id } = node;
 
         if (typeof id === 'string' && id !== '') {
@@ -75,7 +75,7 @@ class SelectorGenerator {
         return false;
     }
 
-    patternTagName(node) {
+    private patternTagName(node: Element): false | string {
         const tag = node.tagName.toLowerCase();
 
         (tag === 'body') && (this.stopPropagation = true);
@@ -83,7 +83,7 @@ class SelectorGenerator {
         return tag;
     }
 
-    patternClass(node) {
+    private patternClass(node: Element): false | string {
         const classList = Array.from(node.classList);
 
         if (classList.length > 0) {
@@ -95,17 +95,28 @@ class SelectorGenerator {
         return false;
     }
 
-    patternChild(node) {
-        const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase());
+    private patternChild(node: Element): false | string {
+        if (node.parentNode) {
+            const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase());
 
-        if (childrenTags.length > 1) {
-            const index = [...node.parentNode.children].indexOf(node);
-            return `:nth-child(${index + 1})`;
+            if (childrenTags.length > 1) {
+                const index = [...node.parentNode.children].indexOf(node);
+                return `:nth-child(${index + 1})`;
+            }
         }
 
         return false;
     }
 
+    getQuerySelector(node: Element): string {
+        this.reset();
+
+        const selectors: string[] = [];
+
+        this.getNodeString(selectors, node);
+
+        return selectors.reverse().join(' > ');
+    }
 }
 
 export default new SelectorGenerator();

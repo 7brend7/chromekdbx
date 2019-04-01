@@ -5,23 +5,23 @@
  * Time: 10:46
  */
 
-import kdbxweb from 'kdbxweb';
+import kdbxweb, { ProtectedValue } from 'kdbxweb';
 import storageManager from './StorageManager';
 
 class PasswordManager {
 
-    static async set(passwd) {
+    static async set(passwd: string): Promise<ProtectedValue> {
         const passwdValue = kdbxweb.ProtectedValue.fromString(passwd);
         await storageManager.setItem('password', passwdValue.getBinary());
         return this.get();
     }
 
-    static async get() {
+    static async get(): Promise<ProtectedValue> {
         const passwdBinary = await storageManager.getItem('password');
         return kdbxweb.ProtectedValue.fromBinary(passwdBinary);
     }
 
-    static async clear() {
+    static async clear(): Promise<void> {
         await storageManager.deleteItem('password');
     }
 

@@ -5,19 +5,19 @@
  * Time: 18:54
  */
 
-import idb from 'idb';
+import idb, { DB, Transaction, UpgradeDB, ObjectStore } from 'idb';
 
 class StorageManager {
 
-    constructor() {
-        this.dbName = 'storage';
-        this.dbStorageName = 'keyval';
-        this.db = null;
-    }
+    private dbName = 'storage';
 
-    async initDb() {
+    private dbStorageName = 'keyval';
+
+    private db?: DB;
+
+    async initDb(): Promise<void> {
         try {
-            this.db = await idb.open(this.dbName, 1, (upgradeDb) => {
+            this.db = await idb.open(this.dbName, 1, (upgradeDb: UpgradeDB) => {
                 upgradeDb.createObjectStore(this.dbStorageName, { autoIncrement: true });
             });
         } catch (e) {
@@ -26,8 +26,13 @@ class StorageManager {
         }
     }
 
-    getStore() {
+    getStore(): {tx: Transaction, store: ObjectStore<any, any>} {
+        if (!this.db) {
+            throw new Error('db is not initialized');
+        }
+
         const tx = this.db.transaction(this.dbStorageName, 'readwrite');
+
         return {
             tx,
             store: tx.objectStore(this.dbStorageName),
@@ -40,17 +45,17 @@ class StorageManager {
      * @param name
      * @returns {Promise<string>}
      */
-    static async generateName(name) {
+    static async generateName(name: string): Promise<string> {
         const hash = await window.crypto.subtle.digest({ name: 'SHA-1' }, (new TextEncoder()).encode(`crome${name}kdbx`));
         const hashArray = Array.from(new Uint8Array(hash));
         return hashArray.map(b => (`00${b.toString(16)}`).slice(-2)).join('');
     }
 
-    async deleteItem(key) {
+    async deleteItem(key: IDBKeyRange | IDBValidKey): Promise<void> {
         await this.setItem(key, null);
     }
 
-    async setItem(key, value) {
+    async setItem(key: IDBKeyRange | IDBValidKey, value: any): Promise<void> {
         if (!this.db) {
             await this.initDb();
         }
@@ -66,7 +71,7 @@ class StorageManager {
         return tx.complete;
     }
 
-    async getItem(key) {
+    async getItem(key: IDBKeyRange | IDBValidKey): Promise<any> {
         if (!this.db) {
             await this.initDb();
         }

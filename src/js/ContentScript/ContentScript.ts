@@ -8,6 +8,7 @@
 import {
     MSG_SAVE_PASS,
     NAME_REGEXP,
+    TYPE_REGEXP,
     MSG_GET_PASSWORD,
     MSG_CLEAR,
     MSG_SET_CUSTOM_CONTENT,
@@ -17,12 +18,18 @@ import {
 } from '../constants';
 import selectorGenerator from './SelectorGenerator';
 import savePopup from './SavePopup';
+import PasswordItem from '../Interfaces/PasswordItem';
+
+type PageItem = {
+    passwordField: HTMLInputElement,
+    nameField: HTMLInputElement,
+};
 
 class ContentScript {
 
-    constructor() {
-        this.pageItems = [];
+    private pageItems: PageItem[] = [];
 
+    constructor() {
         this.addStyles();
         this.fillPasswordField();
         this.detectPasswordFields();
@@ -30,7 +37,7 @@ class ContentScript {
         this.initLoad();
     }
 
-    addStyles() {
+    addStyles(): void {
         const css = document.createElement('style');
         css.type = 'text/css';
         css.innerHTML = `.chromeKdbx--input {
@@ -41,15 +48,15 @@ class ContentScript {
         document.body.appendChild(css);
     }
 
-    fillPasswordField() {
-        chrome.runtime.sendMessage({ type: MSG_GET_PASSWORD, url: document.location.href }, (data) => {
+    fillPasswordField(): void {
+        chrome.runtime.sendMessage({ type: MSG_GET_PASSWORD, url: document.location.href }, (data: PasswordItem[]) => {
             if (data.length > 0) {
                 const item = data[0]; // temporary take the first one
 
                 const { nameSelector, passwordSelector } = item.selectors;
 
-                const nameField = document.querySelector(nameSelector);
-                const passwordField = document.querySelector(passwordSelector);
+                const nameField = document.querySelector(nameSelector) as HTMLInputElement;
+                const passwordField = document.querySelector(passwordSelector) as HTMLInputElement;
 
                 if (nameField && passwordField) {
                     nameField.value = item.name;
@@ -61,20 +68,21 @@ class ContentScript {
         });
     }
 
-    detectPasswordFields() {
-        [...document.querySelectorAll("input[type='password']")].forEach((passwordField) => {
-            const exist = this.pageItems.find(passField => passwordField.isSameNode(passField.passwordField));
+    detectPasswordFields(): void {
+        [...document.querySelectorAll<HTMLInputElement>("input[type='password']")].forEach((passwordField: HTMLInputElement) => {
+            const exist = this.pageItems.find((passField: PageItem) => passwordField.isSameNode(passField.passwordField));
             if (exist) {
                 return;
             }
-
 
             let nameField = null;
             let parent = passwordField.parentElement;
 
             while (!nameField && parent) {
                 // eslint-disable-next-line no-loop-func
-                [...parent.querySelectorAll('input')].forEach(nameItem => (NAME_REGEXP.test(nameItem.name) || NAME_REGEXP.test(nameItem.type)) && (nameField = nameItem));
+                [...parent.querySelectorAll('input')].forEach((nameItem: HTMLInputElement) =>
+                    (NAME_REGEXP.test(nameItem.name) || TYPE_REGEXP.test(nameItem.type)) && nameItem.type !== 'hidden' && (nameField = nameItem));
+
                 parent = parent.parentElement;
             }
 
@@ -93,8 +101,8 @@ class ContentScript {
         setTimeout(this.detectPasswordFields.bind(this), DETECT_PASSWORD_FIELDS_INTERVAL);
     }
 
-    initListeners() {
-        chrome.runtime.onMessage.addListener((data) => {
+    initListeners(): void {
+        chrome.runtime.onMessage.addListener((data: any) => {
             switch (data.type) {
                 default: break;
             }
@@ -103,22 +111,23 @@ class ContentScript {
         window.addEventListener('beforeunload', this.beforeunload.bind(this));
     }
 
-    initLoad() {
+    initLoad(): void {
         setTimeout(this.showPopup, POPUP_SHOW_TIMEOUT);
     }
 
-    showPopup() {
-        chrome.runtime.sendMessage({ type: MSG_CHECK_PAGE_ITEM }, (exist) => {
-            exist && savePopup.show(() => {
-                chrome.runtime.sendMessage({ type: MSG_SAVE_PASS });
-            }, () => {
-                chrome.runtime.sendMessage({ type: MSG_CLEAR });
+    showPopup(): void {
+        chrome.runtime.sendMessage({ type: MSG_CHECK_PAGE_ITEM },
+            (exist: boolean) => {
+                exist && savePopup.show(() => {
+                    chrome.runtime.sendMessage({ type: MSG_SAVE_PASS });
+                }, () => {
+                    chrome.runtime.sendMessage({ type: MSG_CLEAR });
+                });
             });
-        });
     }
 
-    beforeunload() {
-        const pageItem = this.pageItems.find(item => item.passwordField.value !== '');
+    beforeunload(): boolean {
+        const pageItem = this.pageItems.find((item: PageItem) => item.passwordField.value !== '');
 
         pageItem && chrome.runtime.sendMessage({
             type: MSG_SET_CUSTOM_CONTENT,

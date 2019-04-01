@@ -22,8 +22,7 @@ Some research shows me that it's ok to store such data in local storage.
 
 ## How it works
 
-- `webRequest.onBeforeRequest` track all post requests and fetch username and password;
-- `window.onbeforeunload` get css selectors for input fields;
+- `window.onbeforeunload` get values and css selectors of input fields;
 - `IndexedDB` there we store kdbx file and main password;
 - `kdbx` format with import/export ability; used `chromekdbx` group as root;
 - `custom_scripts` helpers for specific sites where we can't fetch data;
@@ -34,11 +33,14 @@ Some research shows me that it's ok to store such data in local storage.
 ## Todo
 
 - [ ] Typescript!
+- [ ] Try to use file instead of IndexedDB;
 - [ ] Support multiple logins;
 - [ ] Implement kdbx import with merge (after installation case);
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
 - [ ] Remove icon after entry removed;
+- [ ] Some error messages hanlder
+- [ ] Search in existing entries (not created by chromekdbx)
 
 ## Contributing
 The project is opensource so fill free to comment and participate to it.

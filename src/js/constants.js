@@ -8,7 +8,8 @@ export const MSG_DOWNLOAD = 'MSG_DOWNLOAD';
 export const MSG_SET_CUSTOM_CONTENT = 'MSG_SET_CUSTOM_CONTENT';
 export const MSG_CHECK_PAGE_ITEM = 'MSG_CHECK_PAGE_ITEM';
 
-export const NAME_REGEXP = /name|login|mail|key/i;
+export const NAME_REGEXP = /name|login|mail|key|id/i;
+export const TYPE_REGEXP = /text|mail/i;
 
 export const POPUP_SHOW_TIMEOUT = 2000; // ms
 export const DETECT_PASSWORD_FIELDS_INTERVAL = 2000; // ms
