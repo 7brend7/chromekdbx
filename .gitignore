@@ -4,3 +4,7 @@ node_modules/
 # generated files
 extension/static/css/*
 extension/static/js/*
+/src/js/sync_server/build/*
+
+# env files
+.env

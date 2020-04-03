@@ -30,6 +30,9 @@ const jsConf = {
                     loader: 'ts-loader',
                     options: {
                         appendTsSuffixTo: [/\.vue$/],
+                        compilerOptions: {
+                            noEmit: false,
+                        },
                     },
                 },
             },

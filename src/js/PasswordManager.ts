@@ -10,8 +10,8 @@ import storageManager from './StorageManager';
 
 class PasswordManager {
 
-    static async set(passwd: string): Promise<ProtectedValue> {
-        const passwdValue = kdbxweb.ProtectedValue.fromString(passwd);
+    static async set(passwd: string | ProtectedValue): Promise<ProtectedValue> {
+        const passwdValue = passwd instanceof ProtectedValue ? passwd : kdbxweb.ProtectedValue.fromString(passwd);
         await storageManager.setItem('password', passwdValue.getBinary());
         return this.get();
     }

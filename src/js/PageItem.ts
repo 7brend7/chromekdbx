@@ -4,7 +4,7 @@
  * Date: 1/15/19
  * Time: 10:41
  */
-import { Entry, KdbxUuid, Meta, ProtectedValue } from 'kdbxweb';
+import {Entry, KdbxUuid, Meta, ProtectedValue} from 'kdbxweb';
 
 export default class PageItem {
 
@@ -59,7 +59,7 @@ export default class PageItem {
         return this;
     }
 
-    setMeta(key: string, value: any): PageItem {
+    setMeta(key: string, value: string): PageItem {
         if (value === null && this.meta.key) {
             delete this.meta.key;
         }
@@ -90,4 +90,37 @@ export default class PageItem {
         /* eslint-enable */
     }
 
+    toJson(): string {
+        return JSON.stringify({
+            name: this.getName(),
+            password: this.getPassword(),
+            url: this.getUrl(),
+            title: this.title,
+            meta: this.meta,
+            icon: this.icon ? this.icon.toString() : null,
+        });
+    }
+
+    static fromJson(data: string): PageItem | null {
+        try {
+            const dataObj = JSON.parse(data);
+
+            const item = new PageItem();
+            dataObj.name && item.setName(dataObj.name);
+            dataObj.password && item.setPassword(dataObj.password);
+            dataObj.url && item.setUrl(dataObj.url);
+            dataObj.title && item.setTitle(dataObj.title);
+            dataObj.meta && (item.meta = dataObj.meta);
+            if (dataObj.icon) {
+                const uuid = KdbxUuid.random();
+                uuid.id = dataObj.icon;
+                uuid.empty = false;
+                item.setIcon(uuid);
+            }
+
+            return item;
+        } catch (e) {
+            return null;
+        }
+    }
 }

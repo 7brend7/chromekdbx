@@ -7,7 +7,7 @@
 
 export const getTranslation = (text: string): string => chrome.i18n.getMessage(text);
 
-export const template = (tpl: string, data: {[key: string]: string}): string => {
+export const template = (tpl: string, data: { [key: string]: string }): string => {
     const re = /{{([^}}]+)?}}/g;
     let match;
     let result = tpl;

@@ -5,20 +5,30 @@
  * Time: 18:54
  */
 
-import idb, { DB, Transaction, UpgradeDB, ObjectStore } from 'idb';
+//import idb, { DB, Transaction, UpgradeDB, ObjectStore } from 'idb';
+import { openDB, DBSchema, IDBPDatabase, IDBPTransaction, IDBPObjectStore } from 'idb';
+
+interface MyDB extends DBSchema {
+    'keyval': {
+        key: string,
+        value: number,
+    }
+}
 
 class StorageManager {
 
     private dbName = 'storage';
 
-    private dbStorageName = 'keyval';
+    //private dbStorageName: string = 'keyval';
 
-    private db?: DB;
+    private db?: IDBPDatabase<MyDB>;
 
     async initDb(): Promise<void> {
         try {
-            this.db = await idb.open(this.dbName, 1, (upgradeDb: UpgradeDB) => {
-                upgradeDb.createObjectStore(this.dbStorageName, { autoIncrement: true });
+            this.db = await openDB<MyDB>(this.dbName, 1, {
+                upgrade(db: IDBPDatabase<MyDB>) {
+                    db.createObjectStore('keyval', { autoIncrement: true });
+                }
             });
         } catch (e) {
             // eslint-disable-next-line no-console
@@ -26,16 +36,16 @@ class StorageManager {
         }
     }
 
-    getStore(): {tx: Transaction, store: ObjectStore<any, any>} {
+    getStore(): {tx: IDBPTransaction<MyDB, ['keyval']>, store: IDBPObjectStore<MyDB, ['keyval'], 'keyval'>} {
         if (!this.db) {
             throw new Error('db is not initialized');
         }
 
-        const tx = this.db.transaction(this.dbStorageName, 'readwrite');
+        const tx = this.db.transaction('keyval', 'readwrite');
 
         return {
             tx,
-            store: tx.objectStore(this.dbStorageName),
+            store: tx.objectStore('keyval'),
         };
     }
 
@@ -51,11 +61,11 @@ class StorageManager {
         return hashArray.map(b => (`00${b.toString(16)}`).slice(-2)).join('');
     }
 
-    async deleteItem(key: IDBKeyRange | IDBValidKey): Promise<void> {
+    async deleteItem(key: string): Promise<void> {
         await this.setItem(key, null);
     }
 
-    async setItem(key: IDBKeyRange | IDBValidKey, value: any): Promise<void> {
+    async setItem(key: string, value: any): Promise<void> {
         if (!this.db) {
             await this.initDb();
         }
@@ -68,10 +78,10 @@ class StorageManager {
         } else {
             await store.put(value, key);
         }
-        return tx.complete;
+        return tx.done;
     }
 
-    async getItem(key: IDBKeyRange | IDBValidKey): Promise<any> {
+    async getItem(key: string): Promise<any> {
         if (!this.db) {
             await this.initDb();
         }

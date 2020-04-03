@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
+    "noEmit": true,
 
+    "experimentalDecorators": true,
     // Target latest version of ECMAScript.
     "target": "esnext",
     // Search under node_modules for non-relative imports.
@@ -19,5 +20,8 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/js/sync_server"
   ]
 }

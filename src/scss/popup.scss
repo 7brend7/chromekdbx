@@ -99,19 +99,29 @@ main {
     text-align: center;
 }
 
-.popup-DownloadIcon {
+.popup-BottomIcons {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 
     label {
         cursor: pointer;
         display: flex;
         align-items: center;
-    }
-
-    svg {
         margin-right: 10px;
+    }
+}
+
+.popup-icon-svg--loading {
+    -webkit-animation: rotation 2s infinite linear;
+}
+
+@-webkit-keyframes rotation {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(359deg);
     }
 }
 

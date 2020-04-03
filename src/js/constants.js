@@ -7,8 +7,12 @@ export const MSG_DELETE_PASSWORD = 'MSG_DELETE_PASSWORD';
 export const MSG_DOWNLOAD = 'MSG_DOWNLOAD';
 export const MSG_SET_CUSTOM_CONTENT = 'MSG_SET_CUSTOM_CONTENT';
 export const MSG_CHECK_PAGE_ITEM = 'MSG_CHECK_PAGE_ITEM';
+export const MSG_RELOAD_DATABASE_MANAGER = 'MSG_RELOAD_DATABASE_MANAGER';
+export const MSG_SYNCHRONIZE = 'MSG_SYNCHRONIZE';
+export const MSG_IMPORT = 'MSG_IMPORT';
+export const MSG_IMPORT_WITH_PASSW = 'MSG_IMPORT_WITH_PASSW';
 
-export const NAME_REGEXP = /name|login|mail|key|id/i;
+export const NAME_REGEXP = /name|login|mail|key|id|e-mail/i;
 export const TYPE_REGEXP = /text|mail/i;
 
 export const POPUP_SHOW_TIMEOUT = 2000; // ms

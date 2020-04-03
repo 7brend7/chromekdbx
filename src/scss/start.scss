@@ -7,6 +7,11 @@ main {
     min-height: 100vh;
 }
 
+.startForm--singleLine {
+    display: flex;
+    align-items: center;
+}
+
 .startForm {
     display: flex;
     line-height: 2;
@@ -56,6 +61,10 @@ main {
     margin-right: 30px;
 }
 
+.startForm--formAlign {
+    width: 400px;
+}
+
 .startForm--formFileContainerContinueBtn {
     margin-top: 20px;
     float: right;
@@ -68,4 +77,67 @@ main {
 
 .startForm--readyToStartLbl {
     font-size: 26px;
+}
+
+.startForm--api {
+
+    button {
+        margin: 0 15px;
+    }
+
+    .startForm--apiTitle {
+        font-size: 26px;
+        margin: 0 0 20px 0;
+    }
+}
+
+.startForm--apiCurrentType {
+    font-size: 13px;
+}
+
+.startForm--formDisabled {
+    opacity: 0.6;
+}
+
+.startForm--apiForm {
+
+    label {
+        font-size: 16px;
+        width: 100px;
+    }
+
+    input {
+        padding: 4px;
+        height: auto;
+    }
+
+    button {
+        margin-top: 20px;
+    }
+}
+
+.startForm--apiFormDb {
+
+    label {
+        width: 260px;
+    }
+
+    input {
+        padding: 5px 10px;
+        height: auto;
+    }
+
+    button {
+        margin-top: 20px;
+    }
+}
+
+.startForm--apiConnectBtn, .startForm--apiNextBtn {
+    float: right;
+}
+
+.startForm--apiError {
+    font-size: 16px;
+    color: $labelErrorColor;
+    height: 32px;
 }

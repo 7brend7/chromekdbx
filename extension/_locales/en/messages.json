@@ -15,7 +15,19 @@
     "savePopup_title": {"message": "Do you want to save <b>{{url}}</b> password to kdbx?"},
     "savePopup_btn_cancel": {"message": "Cancel"},
     "savePopup_btn_save": {"message": "Save"},
+    "confirm_btn_no": {"message": "No"},
+    "confirm_btn_yes": {"message": "Yes"},
+    "promt_btn_ok": {"message": "Ok"},
+    "promt_btn_cancel": {"message": "Cancel"},
     "popup_logo_text": {"message": "<i>Chrome</i> kdbx"},
     "popup_empty_list": {"message": "You don't have any passwords stored, go ahead and add a new one"},
-    "popup_download_text": {"message": "download kdbx file"}
+    "popup_download_text": {"message": "download kdbx file"},
+    "popup_import_db_text": {"message": "import kdbx file"},
+    "popup_synchronization_text": {"message": "synchronize db"},
+    "startForm_connection_titile": {"message": "Please select a connection type:"},
+    "startForm_connection_api_lbl": {"message": "API service"},
+    "startForm_connection_local_lbl": {"message": "local IndexedDB"},
+    "startForm_connection_or": {"message": "OR"},
+    "startForm_connection_your_type": {"message": "Your connection type is:"},
+    "startForm_connection_change": {"message": "change"}
 }

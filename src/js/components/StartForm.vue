@@ -4,49 +4,37 @@
             <div class="startForm--logo">
                 <img src="/static/img/Logoedit.webp" alt="logo">
             </div>
-            <div class="startForm--divider" />
+
+            <div class="startForm--divider"/>
+
             <div class="startForm--form">
-                <div class="startForm--formAlign">
-                    <span v-if="isReady">
-                        <label class="startForm--readyToStartLbl">{{ getMsg('startForm_ready_to_start') }}</label>
-                        <p class="startForm--readyToStartMessage">{{ getMsg('startForm_ready_to_message') }}</p>
-                        <p @click.prevent="readyToStartHandler" v-html="getMsg('startForm_ready_to_download')" />
 
-                        <button class="startForm--closeBtn" type="button" @click="close">
-                            {{ getMsg('startForm_close') }}
-                        </button>
-                    </span>
-                    <span v-else>
-                        <span v-if="!isNewDb">
-                            <label>{{ getMsg('startForm_choose_db') }}</label>
+                <ReadyToStart v-if="isReady" @setReady="setReady"/>
 
-                            <label class="startForm--formFileContainer">
-                                <input v-model="fileName" type="text" :placeholder="getMsg('startForm_file_placeholder')" :class="[{'error': checkError('db')}]">
-                                <input type="file" @change="processFile($event)">
-                            </label>
+                <div class="startForm--formAlign" v-else>
 
-                            <label class="startForm--formFileContainerNote">
-                                {{ getMsg('startForm_dont_have_such') }} <a href="#" @click.prevent="switchDb(true)">{{ getMsg('startForm_click_here') }}</a>.
-                            </label>
-                        </span>
+                    <div v-if="connectionType === null" class="startForm--api">
+                        <label class="startForm--apiTitle">{{ getMsg('startForm_connection_titile') }}</label>
 
-                        <span v-else>
-                            <span v-html="getMsg('startForm_create_db_intro')" />
-                            <label class="startForm--formFileContainerNote">
-                                {{ getMsg('startForm_still_open_db') }} <a href="#" @click.prevent="switchDb(false)">{{ getMsg('startForm_click_here') }}</a>.
-                            </label>
-                        </span>
+                        <span class="startForm--singleLine">
+                                <button class="" type="button" @click="setConnectionType('api')">{{ getMsg('startForm_connection_api_lbl') }}</button>
+                                {{ getMsg('startForm_connection_or') }}
+                                <button class="" type="button" @click="setConnectionType('local')">{{ getMsg('startForm_connection_local_lbl') }}</button>
+                            </span>
+                    </div>
 
-                        <div class="startForm--divider-H" />
+                    <div v-else>
 
-                        <label>{{ getMsg('startForm_password') }}</label>
-                        <input v-model="password" type="password" :class="[{'error': checkError('password')}]">
+                        <span class="startForm--apiCurrentType">{{ getMsg('startForm_connection_your_type') }} <b>{{connectionType}}</b> ( <a href="#" @click.prevent="setConnectionType(null)">{{ getMsg('startForm_connection_change') }}</a> )</span>
 
-                        <label v-if="isNewDb">{{ getMsg('startForm_repeat_password') }}</label>
-                        <input v-if="isNewDb" v-model="re_password" type="password" :class="[{'error': checkError('re_password')}]">
+                        <div class="startForm--divider-H"/>
 
-                        <button class="startForm--formFileContainerContinueBtn" type="button" @click="submit">{{ getMsg('startForm_continue') }}</button>
-                    </span>
+                        <LocalDbForm v-if="connectionType === 'local'" @setReady="setReady"/>
+
+                        <ApiForm v-if="connectionType === 'api'" @setReady="setReady"/>
+
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -54,132 +42,41 @@
 </template>
 
 <script lang="ts">
-    import Component, { mixins } from 'vue-class-component';
-    import kdbxweb, {Credentials, ProtectedValue} from 'kdbxweb';
-    import databaseManager from '../DatabaseManager';
-    import PasswordManager from '../PasswordManager';
+    import Component, {mixins} from 'vue-class-component';
+    import ReadyToStart from './ReadyToStart';
+    import LocalDbForm from './LocalDbForm';
+    import ApiForm from './ApiForm';
 
     import TranslationMixin from './TranslationMixin';
+    import { MSG_RELOAD_DATABASE_MANAGER } from '../constants';
 
-    @Component
+    @Component({
+        components: {
+            ReadyToStart,
+            LocalDbForm,
+            ApiForm,
+        }
+    })
     export default class StartForm extends mixins(TranslationMixin) {
 
-        fileName = '';
-        password = '';
-        re_password = '';
-
-        isNewDb = false;
         isReady = false;
 
-        db: File | null = null;
-        errors: {
-            [key: string]: boolean
-        } = {};
+        connectionType: null | 'local' | 'api' = null;
 
         created(): void {
             this.isReady = localStorage.getItem('startFormPassed') === '1' || false;
+            this.connectionType = <'local' | 'api'>localStorage.getItem('connectionType') || null;
         }
 
-        checkError(name: string): boolean {
-            return typeof this.errors[name] !== 'undefined';
+        setConnectionType(data: 'local' | 'api' | null): void {
+            data === null ? localStorage.removeItem('connectionType') : localStorage.setItem('connectionType', data);
+            this.connectionType = data;
+
+            chrome.runtime.sendMessage({ type: MSG_RELOAD_DATABASE_MANAGER });
         }
 
-        switchDb(isNewDb: boolean): void {
-            this.errors = {};
-            this.isNewDb = isNewDb;
+        setReady(data: boolean): void {
+            this.isReady = data;
         }
-
-        validate(): boolean {
-            this.errors = {};
-            const validationFields = this.isNewDb ? ['password', 're_password'] : ['db', 'password'];
-
-            validationFields.forEach((value: string) => {
-                if (!(this as any)[value]) {
-                    this.errors[value] = true;
-                }
-            });
-
-            this.isNewDb && this.password !== this.re_password && (this.errors.re_password = true);
-
-            return Object.keys(this.errors).length === 0;
-        }
-
-        readyToStartHandler(e: MouseEvent): void {
-            const target = e.target as HTMLElement;
-            if (target && target.tagName.toLowerCase() === 'a') {
-                switch (target.dataset.type) {
-                    case 'download': this.downloadDb(); break;
-                    case 'clear': this.clearAll(); break;
-                    default: break;
-                }
-            }
-        }
-
-        downloadDb(): void {
-            databaseManager.reset();
-            databaseManager.getBinary().then((data: ArrayBuffer) => {
-                const blob = new Blob([data], { type: 'application/octet-stream' });
-                const link = <HTMLAnchorElement>document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = 'chromeKdbxDb.kdbx';
-                link.click();
-            });
-        }
-
-        clearAll(): void {
-            PasswordManager.clear();
-            databaseManager.clear();
-            localStorage.removeItem('startFormPassed');
-            this.isReady = false;
-        }
-
-        async processDbManager(credentials: Credentials): Promise<void> {
-            if (this.isNewDb) {
-                await databaseManager.initNew(credentials);
-            } else {
-                const reader = new FileReader();
-                reader.onload = async function loadFunc() {
-                    if (this.result && this.result instanceof ArrayBuffer) {
-                        await databaseManager.initExisted(this.result, credentials);
-                        await databaseManager.saveDb();
-                    }
-                };
-
-                this.db && reader.readAsArrayBuffer(this.db);
-            }
-        }
-
-        submit(): void {
-            if (!this.validate()) {
-                return;
-            }
-
-            PasswordManager.set(this.password).then((passwd: ProtectedValue) => {
-                const credentials = new kdbxweb.Credentials(passwd, '');
-
-                this.processDbManager(credentials)
-                    .then(() => {
-                        localStorage.setItem('startFormPassed', '1');
-                        this.isReady = true;
-                    })
-                    .catch(() => {
-                        this.password = '';
-                        this.errors.password = true;
-                    });
-            });
-        }
-
-        processFile(e: Event): void {
-            const target = e.target as HTMLInputElement;
-            if (target && target.files) {
-                this.db = target.files[0];
-                this.fileName = this.db.name;
-            }
-        }
-
-        close(): void {
-            window.close();
-        }
-
     };
 </script>

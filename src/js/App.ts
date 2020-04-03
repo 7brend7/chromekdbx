@@ -1,24 +1,15 @@
-/* eslint-disable no-unused-vars */
-import {
-    MSG_GET_FORM_DATA,
-    MSG_SAVE_PASS,
-    MSG_GET_PASSWORD,
-    MSG_GET_ALL_PASSWORD,
-    MSG_CLEAR,
-    MSG_DELETE_PASSWORD,
-    MSG_DOWNLOAD,
-    MSG_SET_CUSTOM_CONTENT,
-    MSG_CHECK_PAGE_ITEM,
-} from './constants';
-/* eslint-enable */
-
-import { Entry, ProtectedValue } from 'kdbxweb';
-import databaseManager from './DatabaseManager';
+import { ByteUtils, Entry, ProtectedValue } from 'kdbxweb';
+import DatabaseManager from './DatabaseManager';
 import PageItem from './PageItem';
 import PasswordItem from './Interfaces/PasswordItem';
 import PopupItem from './Interfaces/PopupItem';
+import ApiEntry from "./Interfaces/ApiEntry";
+import ApiDatabaseManager from "./ApiDatabaseManager";
+import DbConnector from "./DbConnector";
+import PasswordManager from "./PasswordManager";
 
 type MessageSender = chrome.runtime.MessageSender;
+let databaseManager = DatabaseManager.init();
 
 class App {
 
@@ -154,8 +145,8 @@ class App {
      */
     getPassword(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
         const url = new URL(data.url);
-        databaseManager.findItemByHost(url.host).then((items: Entry[]) => {
-            typeof sendResponse === 'function' && sendResponse(items.map((item: Entry) => {
+        databaseManager.findItemByHost(url.host).then((items: ApiEntry[]) => {
+            typeof sendResponse === 'function' && sendResponse(items.map((item: ApiEntry) => {
                 const { fields } = item;
                 const password: string = fields.Password instanceof ProtectedValue ? fields.Password.getText() : fields.Password;
                 const selectors: string = fields.chrome_kdbx instanceof ProtectedValue ? fields.chrome_kdbx.getText() : fields.chrome_kdbx;
@@ -252,6 +243,60 @@ class App {
         sendResponse(!!this.data[this.getTabId(sender)]);
     }
 
+    /**
+     * @see MSG_RELOAD_DATABASE_MANAGER
+     */
+    async reloadDatabaseManager(): Promise<void> {
+        databaseManager = DatabaseManager.init();
+        //await databaseManager.getDb();
+    }
+
+    /**
+     * @see MSG_SYNCHRONIZE
+     */
+    async synchronize(data: any, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
+        await (databaseManager as ApiDatabaseManager).synchronize();
+        typeof sendResponse === 'function' && (sendResponse());
+    }
+
+    /**
+     * @see MSG_IMPORT
+     */
+    async import({type, data}: {type: string, data: {[key: number]: number}}, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
+        const db = (new Int8Array(Object.values(data))).buffer;
+        const dbConnector = new DbConnector();
+        const prevDb = await dbConnector.getDb();
+        try {
+            await dbConnector.saveDb(db);
+            await this.reloadDatabaseManager();
+            await this.synchronize(data, sender, () => {});
+
+            typeof sendResponse === 'function' && (sendResponse(true));
+        }
+        catch (e) {
+            await dbConnector.saveDb(prevDb);
+            await this.reloadDatabaseManager();
+
+            typeof sendResponse === 'function' && (sendResponse(false));
+        }
+    }
+
+    /**
+     * @see MSG_IMPORT_WITH_PASSW
+     *
+     * @param type
+     * @param data
+     * @param passwd
+     * @param sender
+     */
+    async importWithPassw({type, data, passwd}: {type: string, data: {[key: number]: number}, passwd: string}, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
+        const oldpasswd = await PasswordManager.get();
+        await PasswordManager.set(passwd);
+        this.import({type, data}, sender, async (success: boolean) => {
+            !success && (await PasswordManager.set(oldpasswd));
+            typeof sendResponse === 'function' && (sendResponse(success));
+        });
+    }
 }
 
 export default new App();
