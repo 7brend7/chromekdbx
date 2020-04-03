@@ -1,7 +1,7 @@
-const path = require('path');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const FixStyleOnlyEntriesPlugin = require('webpack-fix-style-only-entries');
+const path = require('path')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const FixStyleOnlyEntriesPlugin = require('webpack-fix-style-only-entries')
 
 const jsConf = {
     mode: 'development',
@@ -40,9 +40,6 @@ const jsConf = {
                 test: /\.(html)$/,
                 use: {
                     loader: 'html-loader',
-                    options: {
-                        attrs: [':data-src'],
-                    },
                 },
             },
             {
@@ -65,7 +62,7 @@ const jsConf = {
     plugins: [
         new VueLoaderPlugin(),
     ],
-};
+}
 
 const cssConf = {
     mode: 'development',
@@ -96,6 +93,6 @@ const cssConf = {
             filename: '[name].css',
         }),
     ],
-};
+}
 
-module.exports = [cssConf, jsConf];
+module.exports = [cssConf, jsConf]

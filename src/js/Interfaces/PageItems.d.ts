@@ -8,12 +8,12 @@
 type PageItem = {
     passwordField: HTMLInputElement,
     nameField: HTMLInputElement,
-};
+}
 
-export default PageItem;
+export default PageItem
 
 declare global {
     interface Window {
-        chromeKdbxPageItems: PageItem[];
+        chromeKdbxPageItems: PageItem[]
     }
 }

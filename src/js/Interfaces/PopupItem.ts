@@ -6,8 +6,8 @@
  */
 
 export default interface PopupItem {
-    name: string;
-    url: string;
-    id: string;
-    icon: string | null;
+    name: string
+    url: string
+    id: string
+    icon: string | null
 }

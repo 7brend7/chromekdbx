@@ -4,13 +4,13 @@
  * Date: 2019-09-27
  * Time: 11:37
  */
-import { Request, Response, Router } from "express";
-import routers from "./index";
-import databaseManager from "../db/DatabaseManager";
-import PageItem from "../../PageItem";
-import cklog from "../cklog";
-import { Entry } from "kdbxweb";
-import ApiEntry from "../../Interfaces/ApiEntry";
+import { Request, Response, Router } from 'express'
+import routers from './index'
+import databaseManager from '../db/DatabaseManager'
+import PageItem from '../../PageItem'
+import cklog from '../cklog'
+import { Entry } from 'kdbxweb'
+import ApiEntry from '../../Interfaces/ApiEntry'
 
 export default (router: Router) => {
 
@@ -18,9 +18,9 @@ export default (router: Router) => {
         try {
 
             if (!req.token) {
-                throw new Error('No token provided');
+                throw new Error('No token provided')
             }
-            const { entity, type, value } = req.body;
+            const { entity, type, value } = req.body
 
             /*let result: ApiEntry[] = await (await databaseManager.getDb(req.token)).findItemByHost(value);
 
@@ -32,8 +32,8 @@ export default (router: Router) => {
                 },
             })));*/
         } catch (e) {
-            cklog.error(e.message);
-            res.json({error: 'Failed to search'});
+            cklog.error(e.message)
+            res.json({ error: 'Failed to search' })
         }
-    });
+    })
 }

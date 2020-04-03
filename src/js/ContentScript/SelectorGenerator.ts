@@ -14,9 +14,9 @@ class SelectorGenerator {
     private readonly selectorPatterns: {
         method: (node: Element) => false | string,
         stopChaining: boolean,
-    }[];
+    }[]
 
-    private stopPropagation: boolean = false;
+    private stopPropagation: boolean = false
 
     constructor() {
         this.selectorPatterns = [
@@ -36,87 +36,87 @@ class SelectorGenerator {
                 method: this.patternChild.bind(this),
                 stopChaining: true,
             },
-        ];
+        ]
 
-        this.reset();
+        this.reset()
     }
 
     private getNodeString(selectors: string[], node: Element): void {
-        let str = '';
+        let str = ''
 
         // eslint-disable-next-line no-restricted-syntax
         for (const rule of this.selectorPatterns) {
-            const ruleStr = rule.method(node);
-            ruleStr !== false && (str += ruleStr);
+            const ruleStr = rule.method(node)
+            ruleStr !== false && (str += ruleStr)
 
             if ((ruleStr !== false && rule.stopChaining) || this.stopPropagation) {
-                break;
+                break
             }
         }
 
-        str !== '' && selectors.push(str);
+        str !== '' && selectors.push(str)
 
-        !this.stopPropagation && node.parentNode && this.getNodeString(selectors, node.parentNode as Element);
+        !this.stopPropagation && node.parentNode && this.getNodeString(selectors, node.parentNode as Element)
     }
 
     private reset() {
-        this.stopPropagation = false;
+        this.stopPropagation = false
     }
 
     private patternId(node: Element): false | string {
-        const { id } = node;
+        const { id } = node
 
         if (typeof id === 'string' && id !== '') {
-            this.stopPropagation = true;
+            this.stopPropagation = true
 
-            return `#${id}`;
+            return `#${id}`
         }
 
-        return false;
+        return false
     }
 
     private patternTagName(node: Element): false | string {
         const tag = node.tagName.toLowerCase();
 
-        (tag === 'body') && (this.stopPropagation = true);
+        (tag === 'body') && (this.stopPropagation = true)
 
-        return tag;
+        return tag
     }
 
     private patternClass(node: Element): false | string {
-        const classList = Array.from(node.classList);
+        const classList = Array.from(node.classList)
 
         if (classList.length > 0) {
-            const classStr = `.${classList.join('.')}`;
+            const classStr = `.${classList.join('.')}`
 
-            return (node.parentNode && Array.from(node.parentNode.querySelectorAll(classStr)).length === 1) ? classStr : false;
+            return (node.parentNode && Array.from(node.parentNode.querySelectorAll(classStr)).length === 1) ? classStr : false
         }
 
-        return false;
+        return false
     }
 
     private patternChild(node: Element): false | string {
         if (node.parentNode) {
-            const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase());
+            const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase())
 
             if (childrenTags.length > 1) {
-                const index = [...node.parentNode.children].indexOf(node);
-                return `:nth-child(${index + 1})`;
+                const index = [...node.parentNode.children].indexOf(node)
+                return `:nth-child(${index + 1})`
             }
         }
 
-        return false;
+        return false
     }
 
     getQuerySelector(node: Element): string {
-        this.reset();
+        this.reset()
 
-        const selectors: string[] = [];
+        const selectors: string[] = []
 
-        this.getNodeString(selectors, node);
+        this.getNodeString(selectors, node)
 
-        return selectors.reverse().join(' > ');
+        return selectors.reverse().join(' > ')
     }
 }
 
-export default new SelectorGenerator();
+export default new SelectorGenerator()

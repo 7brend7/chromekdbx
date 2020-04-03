@@ -1,32 +1,31 @@
-import { ByteUtils, Entry, ProtectedValue } from 'kdbxweb';
-import DatabaseManager from './DatabaseManager';
-import PageItem from './PageItem';
-import PasswordItem from './Interfaces/PasswordItem';
-import PopupItem from './Interfaces/PopupItem';
-import ApiEntry from "./Interfaces/ApiEntry";
-import ApiDatabaseManager from "./ApiDatabaseManager";
-import DbConnector from "./DbConnector";
-import PasswordManager from "./PasswordManager";
+import { ByteUtils, Entry, ProtectedValue } from 'kdbxweb'
+import DatabaseManager from './DatabaseManager'
+import PageItem from './PageItem'
+import PasswordItem from './Interfaces/PasswordItem'
+import PopupItem from './Interfaces/PopupItem'
+import ApiEntry from './Interfaces/ApiEntry'
+import ApiDatabaseManager from './ApiDatabaseManager'
+import DbConnector from './DbConnector'
+import PasswordManager from './PasswordManager'
 
-type MessageSender = chrome.runtime.MessageSender;
-let databaseManager = DatabaseManager.init();
+type MessageSender = chrome.runtime.MessageSender
+let databaseManager = DatabaseManager.init()
 
 class App {
-
     /**
      * Collection with passwords fields per tab
      *
      * @type {{}}
      */
     private data: {
-        [key: number]: PageItem,
-    } = {};
+        [key: number]: PageItem;
+    } = {}
 
     /**
      * App constructor
      */
     constructor() {
-        this.initListeners();
+        this.initListeners()
     }
 
     /**
@@ -35,21 +34,24 @@ class App {
      * Register message listeners
      */
     initListeners(): void {
-        chrome.runtime.onInstalled.addListener(this.onInstalled);
+        chrome.runtime.onInstalled.addListener(this.onInstalled)
 
         chrome.runtime.onMessage.addListener((data: any, sender: MessageSender, sendResponse: (response?: any) => void) => {
-            const funcName = data.type.replace(/^MSG_/, '').toLowerCase().replace(/(_[a-z])/g, (match: string, p1: string) => p1.replace('_', '').toUpperCase());
-            (typeof (this as any)[funcName] === 'function') && ((this as any)[funcName](data, sender, sendResponse));
-            return typeof sendResponse === 'function' ? true : null;
-        });
+            const funcName = data.type
+                .replace(/^MSG_/, '')
+                .toLowerCase()
+                .replace(/(_[a-z])/g, (match: string, p1: string) => p1.replace('_', '').toUpperCase())
+            typeof (this as any)[funcName] === 'function' && (this as any)[funcName](data, sender, sendResponse)
+            return typeof sendResponse === 'function' ? true : null
+        })
     }
 
     /**
      * Show start page
      */
     onInstalled(): void {
-        const urlString = chrome.extension.getURL('views/start.html');
-        chrome.tabs.create({ active: true, url: urlString });
+        const urlString = chrome.extension.getURL('views/start.html')
+        chrome.tabs.create({ active: true, url: urlString })
     }
 
     /**
@@ -59,9 +61,9 @@ class App {
     checkPasswordExist(pageItem: PageItem): Promise<boolean> {
         return new Promise<boolean>((res) => {
             this.getPassword({ url: pageItem.getUrl() }, null, (items: PasswordItem[]) => {
-                res(items.filter(item => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0);
-            });
-        });
+                res(items.filter(item => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0)
+            })
+        })
     }
 
     /**
@@ -69,16 +71,16 @@ class App {
      * @returns {PageItem}
      */
     getPageItem(tabId: number): PageItem {
-        !this.data[tabId] && (this.data[tabId] = new PageItem());
+        !this.data[tabId] && (this.data[tabId] = new PageItem())
 
-        return this.data[tabId];
+        return this.data[tabId]
     }
 
     /**
      * @param {number} tabId
      */
     clearPageItem(tabId: number): void {
-        this.data[tabId] && (delete this.data[tabId]);
+        this.data[tabId] && delete this.data[tabId]
     }
 
     /**
@@ -86,11 +88,11 @@ class App {
      * @returns {number}
      */
     getTabId(sender: MessageSender): number {
-        let res = 0;
+        let res = 0
 
-        sender.tab && sender.tab.id && (res = sender.tab.id);
+        sender.tab && sender.tab.id && (res = sender.tab.id)
 
-        return res;
+        return res
     }
 
     /**
@@ -101,7 +103,7 @@ class App {
      * @param {function} sendResponse
      */
     getFormData(data: any, sender: MessageSender, sendResponse: (response?: any) => void): void {
-        typeof sendResponse === 'function' && (sendResponse(this.getPageItem(this.getTabId(sender))));
+        typeof sendResponse === 'function' && sendResponse(this.getPageItem(this.getTabId(sender)))
     }
 
     /**
@@ -111,28 +113,28 @@ class App {
      * @param sender
      */
     savePass(data: any, sender: MessageSender): void {
-        const pageItem = this.getPageItem(this.getTabId(sender));
+        const pageItem = this.getPageItem(this.getTabId(sender))
 
         const addItem = () => {
-            databaseManager.addItem(pageItem);
-            this.clearPageItem(this.getTabId(sender));
-        };
+            databaseManager.addItem(pageItem)
+            this.clearPageItem(this.getTabId(sender))
+        }
 
         if (sender.tab && sender.tab.favIconUrl) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', sender.tab.favIconUrl, true);
-            xhr.responseType = 'arraybuffer';
+            const xhr = new XMLHttpRequest()
+            xhr.open('GET', sender.tab.favIconUrl, true)
+            xhr.responseType = 'arraybuffer'
             xhr.onload = async () => {
-                const id = await databaseManager.addIcon(xhr.response);
-                pageItem.setIcon(id);
-                addItem();
-            };
+                const id = await databaseManager.addIcon(xhr.response)
+                pageItem.setIcon(id)
+                addItem()
+            }
             xhr.onerror = () => {
-                addItem();
-            };
-            xhr.send();
+                addItem()
+            }
+            xhr.send()
         } else {
-            addItem();
+            addItem()
         }
     }
 
@@ -144,20 +146,23 @@ class App {
      * @param sendResponse
      */
     getPassword(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
-        const url = new URL(data.url);
+        const url = new URL(data.url)
         databaseManager.findItemByHost(url.host).then((items: ApiEntry[]) => {
-            typeof sendResponse === 'function' && sendResponse(items.map((item: ApiEntry) => {
-                const { fields } = item;
-                const password: string = fields.Password instanceof ProtectedValue ? fields.Password.getText() : fields.Password;
-                const selectors: string = fields.chrome_kdbx instanceof ProtectedValue ? fields.chrome_kdbx.getText() : fields.chrome_kdbx;
+            typeof sendResponse === 'function' &&
+                sendResponse(
+                    items.map((item: ApiEntry) => {
+                        const { fields } = item
+                        const password: string = fields.Password instanceof ProtectedValue ? fields.Password.getText() : fields.Password
+                        const selectors: string = fields.chrome_kdbx instanceof ProtectedValue ? fields.chrome_kdbx.getText() : fields.chrome_kdbx
 
-                return {
-                    password,
-                    name: fields.UserName,
-                    selectors: JSON.parse(selectors),
-                };
-            }));
-        });
+                        return {
+                            password,
+                            name: fields.UserName,
+                            selectors: JSON.parse(selectors),
+                        }
+                    }),
+                )
+        })
     }
 
     /**
@@ -168,7 +173,7 @@ class App {
      * @param sendResponse
      */
     getAllPassword(data: any, sender: MessageSender, sendResponse: (response?: any) => void): void {
-        databaseManager.getAll().then((allPasswords: PopupItem[]) => sendResponse(allPasswords));
+        databaseManager.getAll().then((allPasswords: PopupItem[]) => sendResponse(allPasswords))
     }
 
     /**
@@ -178,7 +183,7 @@ class App {
      * @param sender
      */
     clear(data: any, sender: MessageSender): void {
-        this.clearPageItem(this.getTabId(sender));
+        this.clearPageItem(this.getTabId(sender))
     }
 
     /**
@@ -190,8 +195,8 @@ class App {
      */
     deletePassword(data: any, sender: MessageSender, sendResponse: (response?: any) => void): void {
         databaseManager.deleteItem(data.id).then(() => {
-            databaseManager.getAll().then((allPasswords: PopupItem[]) => sendResponse(allPasswords));
-        });
+            databaseManager.getAll().then((allPasswords: PopupItem[]) => sendResponse(allPasswords))
+        })
     }
 
     /**
@@ -202,10 +207,10 @@ class App {
      * @param sendResponse
      */
     download(data: any, sender: MessageSender, sendResponse: (response?: any) => void): void {
-        databaseManager.reset();
+        databaseManager.reset()
         databaseManager.getBinary().then((db: ArrayBuffer) => {
-            sendResponse(URL.createObjectURL(new Blob([db], { type: data.blobType })));
-        });
+            sendResponse(URL.createObjectURL(new Blob([db], { type: data.blobType })))
+        })
     }
 
     /**
@@ -216,7 +221,7 @@ class App {
      */
     setCustomContent(data: any, sender: MessageSender): void {
         if (data.name !== '' && data.password !== '') {
-            const pageItem = this.getPageItem(this.getTabId(sender));
+            const pageItem = this.getPageItem(this.getTabId(sender))
 
             pageItem
                 .setName(data.name)
@@ -224,11 +229,11 @@ class App {
                 .setUrl(data.url)
                 .setTitle(data.title)
                 .setMeta('nameSelector', data.nameSelector)
-                .setMeta('passwordSelector', data.passwordSelector);
+                .setMeta('passwordSelector', data.passwordSelector)
 
             this.checkPasswordExist(pageItem).then((exist: boolean) => {
-                exist && this.clearPageItem(this.getTabId(sender));
-            });
+                exist && this.clearPageItem(this.getTabId(sender))
+            })
         }
     }
 
@@ -240,44 +245,43 @@ class App {
      * @param sendResponse
      */
     checkPageItem(data: any, sender: MessageSender, sendResponse: (response: boolean) => void): void {
-        sendResponse(!!this.data[this.getTabId(sender)]);
+        sendResponse(!!this.data[this.getTabId(sender)])
     }
 
     /**
      * @see MSG_RELOAD_DATABASE_MANAGER
      */
     async reloadDatabaseManager(): Promise<void> {
-        databaseManager = DatabaseManager.init();
-        //await databaseManager.getDb();
+        databaseManager = DatabaseManager.init()
+        // await databaseManager.getDb();
     }
 
     /**
      * @see MSG_SYNCHRONIZE
      */
     async synchronize(data: any, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
-        await (databaseManager as ApiDatabaseManager).synchronize();
-        typeof sendResponse === 'function' && (sendResponse());
+        await (databaseManager as ApiDatabaseManager).synchronize()
+        typeof sendResponse === 'function' && sendResponse()
     }
 
     /**
      * @see MSG_IMPORT
      */
-    async import({type, data}: {type: string, data: {[key: number]: number}}, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
-        const db = (new Int8Array(Object.values(data))).buffer;
-        const dbConnector = new DbConnector();
-        const prevDb = await dbConnector.getDb();
+    async import({ type, data }: { type: string; data: { [key: number]: number } }, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
+        const db = new Int8Array(Object.values(data)).buffer
+        const dbConnector = new DbConnector()
+        const prevDb = await dbConnector.getDb()
         try {
-            await dbConnector.saveDb(db);
-            await this.reloadDatabaseManager();
-            await this.synchronize(data, sender, () => {});
+            await dbConnector.saveDb(db)
+            await this.reloadDatabaseManager()
+            await this.synchronize(data, sender, () => {})
 
-            typeof sendResponse === 'function' && (sendResponse(true));
-        }
-        catch (e) {
-            await dbConnector.saveDb(prevDb);
-            await this.reloadDatabaseManager();
+            typeof sendResponse === 'function' && sendResponse(true)
+        } catch (e) {
+            await dbConnector.saveDb(prevDb)
+            await this.reloadDatabaseManager()
 
-            typeof sendResponse === 'function' && (sendResponse(false));
+            typeof sendResponse === 'function' && sendResponse(false)
         }
     }
 
@@ -289,14 +293,18 @@ class App {
      * @param passwd
      * @param sender
      */
-    async importWithPassw({type, data, passwd}: {type: string, data: {[key: number]: number}, passwd: string}, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
-        const oldpasswd = await PasswordManager.get();
-        await PasswordManager.set(passwd);
-        this.import({type, data}, sender, async (success: boolean) => {
-            !success && (await PasswordManager.set(oldpasswd));
-            typeof sendResponse === 'function' && (sendResponse(success));
-        });
+    async importWithPassw(
+        { type, data, passwd }: { type: string; data: { [key: number]: number }; passwd: string },
+        sender: MessageSender,
+        sendResponse: (response?: any) => void,
+    ): Promise<void> {
+        const oldpasswd = await PasswordManager.get()
+        await PasswordManager.set(passwd)
+        this.import({ type, data }, sender, async (success: boolean) => {
+            !success && (await PasswordManager.set(oldpasswd))
+            typeof sendResponse === 'function' && sendResponse(success)
+        })
     }
 }
 
-export default new App();
+export default new App()

@@ -7,7 +7,9 @@ module.exports = {
         "parser": "babel-eslint",
     },
     rules: {
-        "indent": "off",
+        "indent": ["error", 4],
+        "semi": ["error", "never"],
+
         "vue/script-indent": "off",
         "padded-blocks": ['error', { blocks: 'never', classes: 'always', switches: 'never' }],
         "no-unused-expressions": ['error', { allowShortCircuit: true }],

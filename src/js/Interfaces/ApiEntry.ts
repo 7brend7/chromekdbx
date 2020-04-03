@@ -5,8 +5,8 @@
  * Time: 23:12
  */
 
-import { StringProtected } from 'kdbxweb';
+import { StringProtected } from 'kdbxweb'
 
 export default interface ApiEntry {
-    fields: { [key: string]: StringProtected };
+    fields: { [key: string]: StringProtected }
 }

@@ -1,4 +1,4 @@
-import {Credentials} from "kdbxweb";
+import { Credentials } from 'kdbxweb'
 
 /**
  * Created by PhpStorm.
@@ -8,8 +8,8 @@ import {Credentials} from "kdbxweb";
  */
 
 export default interface IDbConnector {
-    getDb(): Promise<ArrayBuffer>;
-    getCredentials(): Promise<Credentials>;
-    saveDb(dataAsArrayBuffer: ArrayBuffer): Promise<void>;
-    clear(): Promise<void>;
+    getDb(): Promise<ArrayBuffer>
+    getCredentials(): Promise<Credentials>
+    saveDb(dataAsArrayBuffer: ArrayBuffer): Promise<void>
+    clear(): Promise<void>
 }

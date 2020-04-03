@@ -4,9 +4,9 @@ const routers: string[] = [
     'db',
     'items',
     'search',
-];
+]
 
 export default routers.reduce((prev: {[key: string]: string}, current: string) => ({
     ...prev,
     [current]: current,
-}), {});
+}), {})

@@ -1,9 +1,9 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response, Router } from 'express'
 
-import cklog from '../cklog';
+import cklog from '../cklog'
 
-import databaseManager from "../db/DatabaseManager";
-import routers from '.';
+import databaseManager from '../db/DatabaseManager'
+import routers from '.'
 
 export default (router: Router) => {
 
@@ -41,37 +41,37 @@ export default (router: Router) => {
     router.get(`/${routers.db}`, async (req: Request, res: Response) => {
         try {
             if (!req.token) {
-                throw new Error('No token provided');
+                throw new Error('No token provided')
             }
 
-            const data = await databaseManager.getBinary(req.token);
+            const data = await databaseManager.getBinary(req.token)
 
-            res.set('Content-Type', 'application/octet-stream');
-            res.send(Buffer.from(data));
+            res.set('Content-Type', 'application/octet-stream')
+            res.send(Buffer.from(data))
         } catch (e) {
-            cklog.error(e.message);
-            res.json({error: "Can't connect to db"});
+            cklog.error(e.message)
+            res.json({ error: "Can't connect to db" })
         }
-    });
+    })
 
     router.put(`/${routers.db}/sync`, async (req: Request, res: Response) => {
         try {
             if (!req.token) {
-                throw new Error('No token provided');
+                throw new Error('No token provided')
             }
 
-            const db: ArrayBuffer = (new Int8Array(Object.values(req.body.db))).buffer;
-            const { time }: { time: number } = req.body;
+            const db: ArrayBuffer = (new Int8Array(Object.values(req.body.db))).buffer
+            const { time }: { time: number } = req.body
 
-            await databaseManager.synchronize(req.token, db, time);
+            await databaseManager.synchronize(req.token, db, time)
 
             return res.json({
                 db: new Int8Array(await databaseManager.getBinary(req.token)),
                 time: databaseManager.getSyncTime(req.token),
-            });
+            })
         } catch (e) {
-            cklog.error(e.message);
-            res.json({ error: "Can't connect to db" });
+            cklog.error(e.message)
+            res.json({ error: "Can't connect to db" })
         }
-    });
+    })
 }

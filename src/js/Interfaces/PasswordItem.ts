@@ -6,10 +6,10 @@
  */
 
 export default interface PasswordItem {
-    name: string;
-    password: string;
+    name: string
+    password: string
     selectors: {
         nameSelector: string,
         passwordSelector: string,
-    };
+    }
 }

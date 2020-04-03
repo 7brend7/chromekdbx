@@ -1,12 +1,12 @@
-import mongoose from 'mongoose';
-import {IConnectionDocument} from "./Connection";
+import mongoose from 'mongoose'
+import { IConnectionDocument } from './Connection'
 
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
 export interface IKdbxInstanceDocument extends mongoose.Document {
-    name: string;
-    content: Buffer;
-    connections: IConnectionDocument[];
+    name: string
+    content: Buffer
+    connections: IConnectionDocument[]
 }
 
 export default mongoose.model<IKdbxInstanceDocument>('KdbxInstance', new Schema({
@@ -24,4 +24,4 @@ export default mongoose.model<IKdbxInstanceDocument>('KdbxInstance', new Schema(
 }, {
     timestamps: true,
     autoIndex: true,
-}));
+}))

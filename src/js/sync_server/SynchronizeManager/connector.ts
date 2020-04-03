@@ -4,7 +4,7 @@
  * Date: 2019-11-04
  * Time: 11:42
  */
-import ISynchronizeManagerConnector from '../../SynchronizeManager/Interfaces/ISynchronizeManagerConnector';
+import ISynchronizeManagerConnector from '../../SynchronizeManager/Interfaces/ISynchronizeManagerConnector'
 
 class SynchronizeManagerConnector implements ISynchronizeManagerConnector {
 
@@ -13,8 +13,8 @@ class SynchronizeManagerConnector implements ISynchronizeManagerConnector {
     }
 
     getItem(key: string): string | null {
-        return '';
+        return ''
     }
 }
 
-export default new SynchronizeManagerConnector();
+export default new SynchronizeManagerConnector()

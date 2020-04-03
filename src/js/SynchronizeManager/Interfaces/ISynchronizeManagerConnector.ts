@@ -6,6 +6,6 @@
  */
 
 export default interface ISynchronizeManagerConnector {
-    setItem(key: string, value: string): void;
-    getItem(key: string): string | null;
+    setItem(key: string, value: string): void
+    getItem(key: string): string | null
 }
