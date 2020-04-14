@@ -55,12 +55,7 @@ class DatabaseManager {
 
         this.db[kdbxInstance.id] = new LocalDatabaseManager(new DbConnector(kdbxInstance, credentials))
 
-        try {
-            await this.db[kdbxInstance.id].openDb()
-        } catch (e) {
-            cklog.error(e)
-            delete this.db[kdbxInstance.id]
-        }
+        await this.db[kdbxInstance.id].openDb()
 
         if (!connection.kdbxInstance) {
             this.addRelations(connection, kdbxInstance)
@@ -84,8 +79,8 @@ class DatabaseManager {
             throw new Error('No initialized connection')
         }
 
-        const id = this.connection[token].kdbxInstance.toString()
-        let kdbxInstance = await KdbxInstance.findById(id)
+        const id: string | null = this.connection[token].kdbxInstance ? this.connection[token].kdbxInstance.toString() : null
+        let kdbxInstance = id ? await KdbxInstance.findById(id) : null
 
         if (!kdbxInstance) {
             const kdbxInstanceGlobal = await KdbxInstance.findOne({ name: this.connection[token].name })
