@@ -10,7 +10,6 @@
  * Almost same as Devtool -> Copy selector
  */
 class SelectorGenerator {
-
     private readonly selectorPatterns: {
         method: (node: Element) => false | string,
         stopChaining: boolean,
@@ -97,7 +96,7 @@ class SelectorGenerator {
 
     private patternChild(node: Element): false | string {
         if (node.parentNode) {
-            const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase())
+            const childrenTags = [...node.parentNode.children].filter((item) => item.tagName.toLowerCase() === node.tagName.toLowerCase())
 
             if (childrenTags.length > 1) {
                 const index = [...node.parentNode.children].indexOf(node)

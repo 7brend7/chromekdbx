@@ -7,7 +7,6 @@ import routers from '.'
 import PopupItem from '../../Interfaces/PopupItem'
 
 export default (router: Router) => {
-
     router.get(`/${routers.items}`, async (req: Request, res: Response) => {
         try {
             if (!req.token) {

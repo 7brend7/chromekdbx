@@ -21,79 +21,82 @@
 </template>
 
 <script lang="ts">
-    import Component, { mixins } from 'vue-class-component';
-    import { UAParser } from 'ua-parser-js';
+import Component, { mixins } from 'vue-class-component'
+import { UAParser } from 'ua-parser-js'
 
-    import ApiManager from '../ApiManager';
-    import ApiFormDbSelect from './ApiFormDbSelect';
+import ApiManager from '../ApiManager'
+import ApiFormDbSelect from './ApiFormDbSelect'
 
-    import TranslationMixin from './TranslationMixin';
-    import { MSG_RELOAD_DATABASE_MANAGER } from "../constants";
+import TranslationMixin from './TranslationMixin'
+import { MSG_RELOAD_DATABASE_MANAGER } from '../constants'
 
-    const apiManager = new ApiManager();
+const apiManager = new ApiManager()
 
-    @Component({
-        components: {
-            ApiFormDbSelect
-        }
-    })
-    export default class ApiForm extends mixins(TranslationMixin) {
-
+@Component({
+    components: {
+        ApiFormDbSelect,
+    },
+})
+export default class ApiForm extends mixins(TranslationMixin) {
         name = '';
+
         url = '';
 
         isLoading = false;
+
         error = false;
+
         errorMessage: string | null = null;
+
         apiFormDbSelect = false;
 
         created(): void {
-            const apiData = sessionStorage.getItem(apiManager.getDataKey());
+            const apiData = sessionStorage.getItem(apiManager.getDataKey())
 
             if (apiData) {
-                const { baseUrl } = JSON.parse(apiData);
-                this.url = baseUrl;
+                const { baseUrl } = JSON.parse(apiData)
+                this.url = baseUrl
             }
 
-            const parser = new UAParser();
-            const browser = parser.getBrowser();
-            const os = parser.getOS();
-            this.name = `${browser.name} (${browser.version}) - ${os.name} (${os.version})`;
+            const parser = new UAParser()
+            const browser = parser.getBrowser()
+            const os = parser.getOS()
+            this.name = `${browser.name} (${browser.version}) - ${os.name} (${os.version})`
         }
 
         async connect(): Promise<void> {
-            //this.isLoading = true;
-            //this.error = false;
-            //this.errorMessage = null;
+            // this.isLoading = true;
+            // this.error = false;
+            // this.errorMessage = null;
 
             sessionStorage.setItem(apiManager.getDataKey(), JSON.stringify({
                 name: this.name,
                 baseUrl: this.url,
-            }));
+            }))
 
-            apiManager.saveCredentials(this.name, this.url);
+            apiManager.saveCredentials(this.name, this.url)
 
-            chrome.runtime.sendMessage({ type: MSG_RELOAD_DATABASE_MANAGER });
-            //const resp = await apiManager.connect();
+            chrome.runtime.sendMessage({ type: MSG_RELOAD_DATABASE_MANAGER })
+            // const resp = await apiManager.connect();
 
-            /*if (resp !== 'OK') {
+            /* if (resp !== 'OK') {
                 apiManager.clear();
                 this.error = true;
                 this.errorMessage = "Cannot process url: wrong url or token";
             }
             else {
                 this.apiFormDbSelect = true;
-            }*/
-            this.apiFormDbSelect = true;
-            //this.isLoading = false;
+            } */
+            this.apiFormDbSelect = true
+            // this.isLoading = false;
         }
 
         setApiFormDbSelect(val: boolean): void {
-            this.apiFormDbSelect = val;
+            this.apiFormDbSelect = val
         }
 
         setReady(val: boolean): void {
-            this.$emit('setReady', val);
+            this.$emit('setReady', val)
         }
-    }
+}
 </script>

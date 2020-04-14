@@ -11,7 +11,6 @@ import PasswordManager from './PasswordManager'
 import IDbConnector from './Interfaces/IDbConnector'
 
 class DbConnector implements IDbConnector {
-
     async getDb(): Promise<ArrayBuffer> {
         return storageManager.getItem('db')
     }
@@ -28,7 +27,6 @@ class DbConnector implements IDbConnector {
     clear(): Promise<void> {
         return storageManager.deleteItem('db')
     }
-
 }
 
 export default DbConnector

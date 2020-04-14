@@ -2,7 +2,6 @@
 import chalk from 'chalk'
 
 class CkLog {
-
     log(message: string): void {
         console.log(message)
     }

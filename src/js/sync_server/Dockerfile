@@ -1,5 +1,5 @@
 FROM alpine:3.9
 
-RUN apk add --no-cache mongodb
+RUN apk add --no-cache mongodb zsh
 
-CMD [ "mongod", "--bind_ip", "0.0.0.0" ]
+CMD [ "mongod", "--bind_ip", "0.0.0.0", "--profile=1", "--slowms=1" ]

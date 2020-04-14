@@ -4,9 +4,9 @@
  * Date: 06/18/19
  * Time: 17:01
  */
+import { ByteUtils, KdbxUuid, ProtectedValue } from 'kdbxweb'
 import routers from './sync_server/routers'
 import PopupItem from './Interfaces/PopupItem'
-import { ByteUtils, KdbxUuid, ProtectedValue } from 'kdbxweb'
 import PageItem from './PageItem'
 import ErrorResponse from './Interfaces/ErrorResponse'
 import ApiEntry from './Interfaces/ApiEntry'
@@ -14,7 +14,6 @@ import ApiEntry from './Interfaces/ApiEntry'
 const { bytesToString } = ByteUtils
 
 class ApiManager {
-
     private baseUrl: string | null = null
 
     private token: string | null = null
@@ -39,7 +38,6 @@ class ApiManager {
      * @param rawResponse
      */
     private async process(uri: string | URL, method: 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DELETE', modifyRequest?: (data: RequestInit) => void, rawResponse: boolean = false): Promise<any> {
-
         if (this.baseUrl === null || this.token === null || this.name === null) {
             throw new Error('Empty url or token')
         }
@@ -89,7 +87,6 @@ class ApiManager {
      *
      */
     loadCredentials(): void {
-
         const apiData = localStorage.getItem(this.getDataKey())
 
         if (apiData) {
@@ -152,14 +149,14 @@ class ApiManager {
         return this.apiDataKey
     }
 
-    /*initDb(name: string, password: string): Promise<ApiResponse> {
+    /* initDb(name: string, password: string): Promise<ApiResponse> {
         return this.process(routers.db, 'POST', (data: RequestInit) => {
             data.body = JSON.stringify({
                 name,
                 password
             });
         });
-    }*/
+    } */
 
     async getBinary(): Promise<ArrayBuffer> {
         const resp: Response = await this.process(routers.db, 'GET', () => {}, true)
@@ -171,7 +168,6 @@ class ApiManager {
     }
 
     async findItemByHost(host: string): Promise<ApiEntry[]> {
-
         const data = await this.process(routers.search, 'POST', (data: RequestInit) => {
             data.body = JSON.stringify({
                 entity: 'entry',
@@ -180,20 +176,18 @@ class ApiManager {
             })
         })
 
-        return data.map((item: ApiEntry): ApiEntry => {
-            return {
-                fields: {
-                    ...item.fields,
-                    Password: ProtectedValue.fromString(item.fields.Password as string),
-                    chrome_kdbx: ProtectedValue.fromString(item.fields.chrome_kdbx as string),
-                },
+        return data.map((item: ApiEntry): ApiEntry => ({
+            fields: {
+                ...item.fields,
+                Password: ProtectedValue.fromString(item.fields.Password as string),
+                chrome_kdbx: ProtectedValue.fromString(item.fields.chrome_kdbx as string),
+            },
 
-            }
-        })
+        }))
     }
 
     async synchronize(db: ArrayBuffer, time: number): Promise<{db: {[key: number]: number}, time: number}> {
-        const resp: {db: {[key: number]: number}, time: number} =  await this.process(`${routers.db}/sync`, 'PUT', (data: RequestInit) => {
+        const resp: {db: {[key: number]: number}, time: number} = await this.process(`${routers.db}/sync`, 'PUT', (data: RequestInit) => {
             data.body = JSON.stringify({
                 time,
                 db: new Int8Array(db),
@@ -201,6 +195,14 @@ class ApiManager {
         })
         return resp
     }
+
+    async saveDb(db: ArrayBuffer): Promise<void> {
+        await this.process(`${routers.db}`, 'PUT', (data: RequestInit) => {
+            (data.headers as Headers).set('Content-Type', 'application/octet-stream')
+            data.body = db
+        })
+    }
 }
 
 export default ApiManager
+0

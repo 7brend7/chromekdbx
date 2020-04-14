@@ -26,125 +26,123 @@
         <input v-model="password" type="password" :class="[{'error': checkError('password')}]">
 
         <label v-if="isNewDb">{{ getMsg('startForm_repeat_password') }}</label>
-        <input v-if="isNewDb" v-model="re_password" type="password" :class="[{'error': checkError('re_password')}]">
+        <input v-if="isNewDb" v-model="rePassword" type="password" :class="[{'error': checkError('rePassword')}]">
 
         <button class="startForm--formFileContainerContinueBtn" type="button" @click="submit">{{ getMsg('startForm_continue') }}</button>
     </div>
 </template>
 
 <script lang="ts">
-    import Component, {mixins} from 'vue-class-component';
-    import kdbxweb, {Credentials, ProtectedValue} from 'kdbxweb';
-    import DatabaseManager from '../DatabaseManager';
-    import PasswordManager from '../PasswordManager';
+import Component, { mixins } from 'vue-class-component'
+import kdbxweb, { Credentials, ProtectedValue } from 'kdbxweb'
+import DatabaseManager from '../DatabaseManager'
+import PasswordManager from '../PasswordManager'
 
-    import TranslationMixin from './TranslationMixin';
-    import LocalDatabaseManager from "../LocalDatabaseManager";
+import TranslationMixin from './TranslationMixin'
+import LocalDatabaseManager from '../LocalDatabaseManager'
 
-    let databaseManager = DatabaseManager.init();
+let databaseManager = DatabaseManager.init()
 
-    @Component
-    export default class LocalDbForm extends mixins(TranslationMixin) {
-
+@Component
+export default class LocalDbForm extends mixins(TranslationMixin) {
         isNewDb = false;
 
         fileName = '';
+
         password = '';
-        re_password = '';
+
+        rePassword = '';
 
         errors: {
             [key: string]: boolean
         } = {};
 
         constructor() {
-            super();
+            super()
 
-            databaseManager = DatabaseManager.init();
+            databaseManager = DatabaseManager.init()
         }
 
         switchDb(isNewDb: boolean): void {
-            this.errors = {};
-            this.isNewDb = isNewDb;
+            this.errors = {}
+            this.isNewDb = isNewDb
         }
 
         db: File | null = null;
 
         checkError(name: string): boolean {
-            return typeof this.errors[name] !== 'undefined';
+            return typeof this.errors[name] !== 'undefined'
         }
 
         processDbManager(credentials: Credentials): Promise<void> {
             return new Promise(async (res, rej) => {
                 if (this.isNewDb) {
                     try {
-                        await (databaseManager as LocalDatabaseManager).initNew(credentials, 'chromekdbx');
-                        res();
+                        await (databaseManager as LocalDatabaseManager).initNew(credentials, 'chromekdbx')
+                        res()
+                    } catch (e) {
+                        rej(e)
                     }
-                    catch (e) {
-                        rej(e);
-                    }
-                }
-                else {
-                    const reader = new FileReader();
+                } else {
+                    const reader = new FileReader()
                     reader.onload = async function loadFunc() {
                         if (this.result && this.result instanceof ArrayBuffer) {
                             try {
-                                await (databaseManager as LocalDatabaseManager).initExisted(this.result, credentials);
-                                await (databaseManager as LocalDatabaseManager).saveDb();
-                                res();
-                            }
-                            catch (e) {
-                                rej(e);
+                                await (databaseManager as LocalDatabaseManager).initExisted(this.result, credentials)
+                                await (databaseManager as LocalDatabaseManager).saveDb()
+                                res()
+                            } catch (e) {
+                                rej(e)
                             }
                         }
-                    };
+                    }
 
-                    this.db && reader.readAsArrayBuffer(this.db);
+                    this.db && reader.readAsArrayBuffer(this.db)
                 }
-            });
+            })
         }
 
         processFile(e: Event): void {
-            const target = e.target as HTMLInputElement;
+            const target = e.target as HTMLInputElement
             if (target && target.files) {
-                this.db = target.files[0];
-                this.fileName = this.db.name;
+                this.db = target.files[0]
+                this.fileName = this.db.name
             }
         }
 
         validate(): boolean {
-            this.errors = {};
-            const validationFields = this.isNewDb ? ['password', 're_password'] : ['db', 'password'];
+            this.errors = {}
+            const validationFields = this.isNewDb ? ['password', 'rePassword'] : ['db', 'password']
 
             validationFields.forEach((value: string) => {
                 if (!(this as any)[value]) {
-                    this.errors[value] = true;
+                    this.errors[value] = true
                 }
-            });
+            })
 
-            this.isNewDb && this.password !== this.re_password && (this.errors.re_password = true);
+            this.isNewDb && this.password !== this.rePassword && (this.errors.rePassword = true)
 
-            return Object.keys(this.errors).length === 0;
+            return Object.keys(this.errors).length === 0
         }
 
         submit(): void {
             if (!this.validate()) {
-                return;
+                return
             }
 
             PasswordManager.set(this.password).then((passwd: ProtectedValue) => {
-                const credentials = new kdbxweb.Credentials(passwd, '');
+                const credentials = new kdbxweb.Credentials(passwd, '')
 
                 this.processDbManager(credentials)
                     .then(() => {
-                        localStorage.setItem('startFormPassed', '1');
-                        this.$emit('setReady', true);
+                        localStorage.setItem('startFormPassed', '1')
+                        this.$emit('setReady', true)
                     })
                     .catch(() => {
-                        this.password = '';
-                        this.errors.password = true;
-                    });
-            });
+                        this.password = ''
+                        this.errors.password = true
+                    })
+            })
         }
-    }
+}
 </script>

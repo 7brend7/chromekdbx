@@ -108,8 +108,12 @@ main {
         cursor: pointer;
         display: flex;
         align-items: center;
-        margin-right: 10px;
+        margin-right: 20px;
     }
+}
+
+label.popup-BottomIcons--labelLast {
+    margin-right: 0;
 }
 
 .popup-icon-svg--loading {

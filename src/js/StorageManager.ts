@@ -6,7 +6,9 @@
  */
 
 // import idb, { DB, Transaction, UpgradeDB, ObjectStore } from 'idb';
-import { openDB, DBSchema, IDBPDatabase, IDBPTransaction, IDBPObjectStore } from 'idb'
+import {
+    openDB, DBSchema, IDBPDatabase, IDBPTransaction, IDBPObjectStore,
+} from 'idb'
 
 interface MyDB extends DBSchema {
     'keyval': {
@@ -16,7 +18,6 @@ interface MyDB extends DBSchema {
 }
 
 class StorageManager {
-
     private dbName = 'storage'
 
     // private dbStorageName: string = 'keyval';
@@ -58,7 +59,7 @@ class StorageManager {
     static async generateName(name: string): Promise<string> {
         const hash = await window.crypto.subtle.digest({ name: 'SHA-1' }, (new TextEncoder()).encode(`crome${name}kdbx`))
         const hashArray = Array.from(new Uint8Array(hash))
-        return hashArray.map(b => (`00${b.toString(16)}`).slice(-2)).join('')
+        return hashArray.map((b) => (`00${b.toString(16)}`).slice(-2)).join('')
     }
 
     async deleteItem(key: string): Promise<void> {
@@ -91,7 +92,6 @@ class StorageManager {
         const { store } = this.getStore()
         return store.get(key)
     }
-
 }
 
 export default new StorageManager()

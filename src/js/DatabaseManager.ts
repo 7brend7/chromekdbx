@@ -11,9 +11,7 @@ import ApiDatabaseManager from './ApiDatabaseManager'
 import DbConnector from './DbConnector'
 
 class DatabaseManager {
-
     static init(): IDatabaseManager {
-
         const connectionType = <'local' | 'api'>localStorage.getItem('connectionType') || 'local'
         if (connectionType === 'api') {
             return new ApiDatabaseManager()

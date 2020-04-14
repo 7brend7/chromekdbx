@@ -13,6 +13,7 @@ const POPUP_CLOSE_TIMEOUT = 300
 
 class SavePopup {
     private saveHandler: () => void = this.defaultSaveHandler
+
     private cancelHandler: () => void = this.defaultCancelHandler
 
     /**
@@ -65,15 +66,15 @@ class SavePopup {
         const target = e.target as HTMLButtonElement
         if (target.type === 'button') {
             switch (target.dataset.type) {
-                case 'close':
-                    this.closeSavePopup()
-                    this.cancelHandler()
-                    break
-                case 'save':
-                    this.savePassword()
-                    break
-                default:
-                    break
+            case 'close':
+                this.closeSavePopup()
+                this.cancelHandler()
+                break
+            case 'save':
+                this.savePassword()
+                break
+            default:
+                break
             }
         }
     }

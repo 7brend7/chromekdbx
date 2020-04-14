@@ -5,7 +5,9 @@
  * Time: 10:45
  */
 
-import kdbxweb, { Credentials, Group, Kdbx, KdbxUuid, Entry, ByteUtils } from 'kdbxweb'
+import kdbxweb, {
+    Credentials, Group, Kdbx, KdbxUuid, Entry, ByteUtils,
+} from 'kdbxweb'
 import PageItem from './PageItem'
 import PopupItem from './Interfaces/PopupItem'
 import IDatabaseManager from './Interfaces/IDatabaseManager'
@@ -14,7 +16,6 @@ import SynchronizeManager from './SynchronizeManager'
 import synchronizeManagerConnector from './SynchronizeManager/connector'
 
 class LocalDatabaseManager implements IDatabaseManager {
-
     private db: Kdbx | null = null
 
     private connector: IDbConnector

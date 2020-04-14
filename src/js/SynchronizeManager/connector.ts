@@ -7,7 +7,6 @@
 import ISynchronizeManagerConnector from './Interfaces/ISynchronizeManagerConnector'
 
 class SynchronizeManagerConnector implements ISynchronizeManagerConnector {
-
     setItem(key: string, value: string): void {
         localStorage.setItem(key, value)
     }

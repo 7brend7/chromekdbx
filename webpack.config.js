@@ -45,6 +45,13 @@ const jsConf = {
             {
                 test: /\.svg$/,
                 loader: 'vue-svg-loader',
+                options: {
+                    svgo: {
+                        plugins: [
+                            { cleanupIDs: false },
+                        ],
+                    },
+                },
             },
         ],
     },

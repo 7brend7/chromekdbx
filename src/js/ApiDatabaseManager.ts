@@ -1,6 +1,8 @@
+import kdbxweb, {
+    Credentials, Entry, Kdbx, KdbxUuid,
+} from 'kdbxweb'
 import ApiManager from './ApiManager'
 import PopupItem from './Interfaces/PopupItem'
-import kdbxweb, { Credentials, Entry, Kdbx, KdbxUuid } from 'kdbxweb'
 import PageItem from './PageItem'
 import IDatabaseManager from './Interfaces/IDatabaseManager'
 import ApiEntry from './Interfaces/ApiEntry'
@@ -11,7 +13,6 @@ import SynchronizeManager from './SynchronizeManager'
 import synchronizeManagerConnector from './SynchronizeManager/connector'
 
 class ApiDatabaseManager implements IDatabaseManager {
-
     private apiManager: ApiManager = new ApiManager()
 
     private credentials: Credentials | null = null
@@ -70,12 +71,12 @@ class ApiDatabaseManager implements IDatabaseManager {
 
     async addItem(pageItem: PageItem): Promise<void> {
         await (await this.getDbManager()).addItem(pageItem)
-        await this.synchronize()
+        await this.saveDb()
     }
 
     async deleteItem(id: string): Promise<void> {
         await (await this.getDbManager()).deleteItem(id)
-        await this.synchronize()
+        await this.saveDb()
     }
 
     async reloadLocal(dataInput: ArrayBuffer | null = null): Promise<void> {
@@ -90,7 +91,7 @@ class ApiDatabaseManager implements IDatabaseManager {
         this.databaseManager = new LocalDatabaseManager(connector)
     }
 
-    async synchronize(): Promise<void> {
+    /* async synchronize(): Promise<void> {
         const synchronizeManager = new SynchronizeManager(synchronizeManagerConnector)
 
         const currentSyncTime: number = synchronizeManager.getCurrentTimestamp()
@@ -99,6 +100,17 @@ class ApiDatabaseManager implements IDatabaseManager {
 
         synchronizeManager.setTimestamp(new Date(time))
         await this.reloadLocal((new Int8Array(Object.values(db))).buffer)
+    } */
+
+    async getFreshDb(): Promise<PopupItem[]> {
+        const db: ArrayBuffer = await this.apiManager.getBinary()
+        await this.reloadLocal(db)
+        return this.getAll()
+    }
+
+    async saveDb(): Promise<void> {
+        const db: ArrayBuffer = await (await this.getDbManager()).getBinary()
+        await this.apiManager.saveDb(db)
     }
 }
 

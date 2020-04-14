@@ -7,7 +7,6 @@
 import ISynchronizeManagerConnector from '../../SynchronizeManager/Interfaces/ISynchronizeManagerConnector'
 
 class SynchronizeManagerConnector implements ISynchronizeManagerConnector {
-
     setItem(key: string, value: string): void {
 
     }

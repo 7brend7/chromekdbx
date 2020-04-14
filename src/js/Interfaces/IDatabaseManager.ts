@@ -1,4 +1,6 @@
-import { Credentials, Entry, Group, Kdbx, KdbxUuid } from 'kdbxweb'
+import {
+    Credentials, Entry, Group, Kdbx, KdbxUuid,
+} from 'kdbxweb'
 import PageItem from '../PageItem'
 import PopupItem from './PopupItem'
 import ApiEntry from './ApiEntry'

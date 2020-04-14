@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { IConnectionDocument } from './Connection'
 
-const Schema = mongoose.Schema
+const { Schema } = mongoose
 
 export interface IKdbxInstanceDocument extends mongoose.Document {
     name: string

@@ -19,48 +19,50 @@
 </template>
 
 <script lang="ts">
-    import Component, {mixins} from 'vue-class-component';
-    import ApiDatabaseManager from '../ApiDatabaseManager';
+import Component, { mixins } from 'vue-class-component'
+import ApiDatabaseManager from '../ApiDatabaseManager'
 
-    import TranslationMixin from './TranslationMixin';
-    import { MSG_RELOAD_DATABASE_MANAGER } from "../constants";
+import TranslationMixin from './TranslationMixin'
+import { MSG_RELOAD_DATABASE_MANAGER } from '../constants'
 
-    @Component
-    export default class ApiForm extends mixins(TranslationMixin) {
-
+@Component
+export default class ApiForm extends mixins(TranslationMixin) {
         errorMessage: string | null = null;
+
         name = '';
+
         password = '';
+
         isLoading = false;
+
         error = false;
 
         back(): void {
-            this.$emit('setApiFormDbSelect', false);
+            this.$emit('setApiFormDbSelect', false)
         }
 
         async submit(): Promise<void> {
-
-            this.error = false;
-            this.errorMessage = null;
-            this.isLoading = true;
+            this.error = false
+            this.errorMessage = null
+            this.isLoading = true
 
             if (this.name === '' || this.password === '') {
-                this.error = true;
-                this.errorMessage = 'Please provide DB name and password';
+                this.error = true
+                this.errorMessage = 'Please provide DB name and password'
             } else {
                 try {
-                    const apiDatabaseManager = new ApiDatabaseManager();
-                    await apiDatabaseManager.connect(this.name, this.password);
-                    await apiDatabaseManager.reloadLocal();
-                    chrome.runtime.sendMessage({ type: MSG_RELOAD_DATABASE_MANAGER });
-                    localStorage.setItem('startFormPassed', '1');
-                    this.$emit('setReady', true);
+                    const apiDatabaseManager = new ApiDatabaseManager()
+                    await apiDatabaseManager.connect(this.name, this.password)
+                    await apiDatabaseManager.reloadLocal()
+                    chrome.runtime.sendMessage({ type: MSG_RELOAD_DATABASE_MANAGER })
+                    localStorage.setItem('startFormPassed', '1')
+                    this.$emit('setReady', true)
                 } catch (e) {
-                    this.error = true;
-                    this.errorMessage = e.message;
+                    this.error = true
+                    this.errorMessage = e.message
                 }
             }
-            this.isLoading = false;
+            this.isLoading = false
         }
-    }
+}
 </script>

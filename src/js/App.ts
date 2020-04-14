@@ -61,7 +61,7 @@ class App {
     checkPasswordExist(pageItem: PageItem): Promise<boolean> {
         return new Promise<boolean>((res) => {
             this.getPassword({ url: pageItem.getUrl() }, null, (items: PasswordItem[]) => {
-                res(items.filter(item => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0)
+                res(items.filter((item) => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0)
             })
         })
     }
@@ -112,7 +112,9 @@ class App {
      * @param data
      * @param sender
      */
-    savePass(data: any, sender: MessageSender): void {
+    async savePass(data: any, sender: MessageSender): Promise<void> {
+        await (databaseManager as ApiDatabaseManager).getFreshDb()
+
         const pageItem = this.getPageItem(this.getTabId(sender))
 
         const addItem = () => {
@@ -148,8 +150,8 @@ class App {
     getPassword(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
         const url = new URL(data.url)
         databaseManager.findItemByHost(url.host).then((items: ApiEntry[]) => {
-            typeof sendResponse === 'function' &&
-                sendResponse(
+            typeof sendResponse === 'function'
+                && sendResponse(
                     items.map((item: ApiEntry) => {
                         const { fields } = item
                         const password: string = fields.Password instanceof ProtectedValue ? fields.Password.getText() : fields.Password
@@ -163,17 +165,6 @@ class App {
                     }),
                 )
         })
-    }
-
-    /**
-     * @see MSG_GET_ALL_PASSWORD
-     *
-     * @param data
-     * @param sender
-     * @param sendResponse
-     */
-    getAllPassword(data: any, sender: MessageSender, sendResponse: (response?: any) => void): void {
-        databaseManager.getAll().then((allPasswords: PopupItem[]) => sendResponse(allPasswords))
     }
 
     /**
@@ -257,11 +248,11 @@ class App {
     }
 
     /**
-     * @see MSG_SYNCHRONIZE
+     * @see MSG_GET_FRESH_DB
      */
-    async synchronize(data: any, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
-        await (databaseManager as ApiDatabaseManager).synchronize()
-        typeof sendResponse === 'function' && sendResponse()
+    async getFreshDb(data: any, sender: MessageSender, sendResponse: (response: PopupItem[]) => void): Promise<void> {
+        const db: PopupItem[] = await (databaseManager as ApiDatabaseManager).getFreshDb()
+        typeof sendResponse === 'function' && sendResponse(db)
     }
 
     /**
@@ -274,7 +265,7 @@ class App {
         try {
             await dbConnector.saveDb(db)
             await this.reloadDatabaseManager()
-            await this.synchronize(data, sender, () => {})
+            // await this.saveDb(data, sender, () => {})
 
             typeof sendResponse === 'function' && sendResponse(true)
         } catch (e) {

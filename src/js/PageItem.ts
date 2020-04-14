@@ -4,10 +4,11 @@
  * Date: 1/15/19
  * Time: 10:41
  */
-import { Entry, KdbxUuid, Meta, ProtectedValue } from 'kdbxweb'
+import {
+    Entry, KdbxUuid, Meta, ProtectedValue,
+} from 'kdbxweb'
 
 export default class PageItem {
-
     private name: string = ''
 
     private password: string = ''
@@ -79,11 +80,11 @@ export default class PageItem {
      */
     fillEntry(entry: Entry, meta: Meta) {
         /* eslint-disable no-param-reassign */
-        entry.fields['UserName'] = this.name
-        entry.fields['Password'] = meta.memoryProtection.password ? ProtectedValue.fromString(this.password) : this.password
-        entry.fields['URL'] = meta.memoryProtection.url ? ProtectedValue.fromString(this.url) : this.url
-        entry.fields['Title'] = this.title
-        entry.fields['chrome_kdbx'] = ProtectedValue.fromString(this.serializeMeta())
+        entry.fields.UserName = this.name
+        entry.fields.Password = meta.memoryProtection.password ? ProtectedValue.fromString(this.password) : this.password
+        entry.fields.URL = meta.memoryProtection.url ? ProtectedValue.fromString(this.url) : this.url
+        entry.fields.Title = this.title
+        entry.fields.chrome_kdbx = ProtectedValue.fromString(this.serializeMeta())
 
         this.icon && (entry.customIcon = this.icon)
 

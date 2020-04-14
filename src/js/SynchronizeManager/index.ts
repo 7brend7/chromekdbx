@@ -7,7 +7,6 @@
 import ISynchronizeManagerConnector from './Interfaces/ISynchronizeManagerConnector'
 
 class SynchronizeManager {
-
     private key = 'sync_time'
 
     private connector: ISynchronizeManagerConnector

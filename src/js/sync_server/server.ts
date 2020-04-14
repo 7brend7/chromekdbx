@@ -15,20 +15,22 @@ import publicIp from 'public-ip'
 
 import dotenv from 'dotenv'
 
+import routersInit from './routers/init'
+import auth from './auth'
+import cklog from './cklog'
+import dbInit from './db/init'
+
 const processCwd = process.cwd()
 
 dotenv.config({
     path: path.resolve(processCwd, 'src/js/sync_server/.env'),
 })
 
-import routersInit from './routers/init'
-import auth from './auth'
-import cklog from './cklog'
-import dbInit from './db/init'
-
 class Server {
     private app: Application = express()
+
     private port: number = parseInt(<string>process.env.PORT, 10) || 443
+
     private initOk = false
 
     async configure(): Promise<boolean> {
@@ -37,16 +39,13 @@ class Server {
         this.app.use(bodyParser.json())
         this.app.use(bodyParser.raw())
         this.app.use(morgan('tiny', <Options>{
-            skip: (req: Request, res: Response) => {
-                return req.is('html')
-            },
+            skip: (req: Request, res: Response) => req.is('html'),
         }))
 
         try {
             await dbInit()
             return true
-        }
-        catch (e) {
+        } catch (e) {
             cklog.error(e.message)
         }
 
@@ -59,7 +58,7 @@ class Server {
         this.initOk && this.initRoutes()
 
         // TODO: move keys out!;
-        const privateKey  = fs.readFileSync(path.resolve(processCwd, 'src/js/sync_server/keys/server.key'), 'utf8')
+        const privateKey = fs.readFileSync(path.resolve(processCwd, 'src/js/sync_server/keys/server.key'), 'utf8')
         const certificate = fs.readFileSync(path.resolve(processCwd, 'src/js/sync_server/keys/server.crt'), 'utf8')
 
         const credentials = { key: privateKey, cert: certificate }
@@ -73,11 +72,10 @@ class Server {
 
         routersInit.init(this.app)
 
-        publicIp.v4().then(ip => {
+        publicIp.v4().then((ip: string) => {
             cklog.notice(`Your api url is: https://${ip}${routersInit.getApiPath()}`)
         })
     }
-
 }
 
 const server = new Server()

@@ -1,36 +1,42 @@
 module.exports = {
-    extends: [
-        'airbnb-base',
-        'plugin:vue/recommended',
-    ],
-    parserOptions: {
-        "parser": "babel-eslint",
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true,
+        "webextensions": true
     },
-    rules: {
+    "extends": [
+        "plugin:vue/essential",
+        "airbnb-base"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "parser": "@typescript-eslint/parser",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "vue",
+        "@typescript-eslint"
+    ],
+    "rules": {
         "indent": ["error", 4],
         "semi": ["error", "never"],
-
-        "vue/script-indent": "off",
-        "padded-blocks": ['error', { blocks: 'never', classes: 'always', switches: 'never' }],
-        "no-unused-expressions": ['error', { allowShortCircuit: true }],
-        "no-underscore-dangle": "off",
-        "class-methods-use-this": "off",
-        "max-len": "off",
-        "no-return-assign": "off",
-
-        "vue/html-indent": ["error", 4],
-        "vue/max-attributes-per-line": "off",
-        "vue/no-v-html": "off",
-        "vue/singleline-html-element-content-newline": "off",
+        "max-len": ["error", { "code": 180 }],
+        "import/extensions": ["error", "never"],
+        "no-unused-vars": "off",
+        "no-async-promise-executor": "off",
+        'no-unused-expressions': ['error', { allowShortCircuit: true }],
     },
-    env: {
-        "webextensions": true,
-    },
-    settings: {
-        'import/resolver': {
-            node: {
-                extensions: ['.js', '.vue']
+    "settings": {
+        "import/resolver": {
+            "node": {
+                extensions: ['.js', '.vue', '.ts'],
+                paths: ['./src']
             }
-        },
-    },
+        }
+    }
 };

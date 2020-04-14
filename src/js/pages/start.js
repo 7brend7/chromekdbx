@@ -1,9 +1,9 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
-import StartForm from '../components/StartForm';
+import StartForm from '../components/StartForm'
 
 new Vue({
     render(createElement) {
-        return createElement(StartForm);
+        return createElement(StartForm)
     },
-}).$mount('#app');
+}).$mount('#app')
