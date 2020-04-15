@@ -132,8 +132,18 @@ class LocalDatabaseManager implements IDatabaseManager {
 
     async deleteItem(id: string): Promise<void> {
         const group = await this.getChromekdbxGroup()
-        group.entries = group.entries.filter((item: Entry) => item.uuid.id !== id)
+        group.entries = group.entries.filter((item: Entry) => {
+            (item.uuid.id === id) && this.removeIcon(item)
+            return item.uuid.id !== id
+        })
         await this.saveDb()
+    }
+
+    async removeIcon(entry: Entry): Promise<void> {
+        if (entry.customIcon) {
+            const db = await this.getDb()
+            delete db.meta.customIcons[entry.customIcon.toString()]
+        }
     }
 }
 

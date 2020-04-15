@@ -4,7 +4,11 @@
 
 ## Why do we need this?
 
-No clouds! All passwords stores locally.
+~~No clouds! All passwords stores locally.~~
+
+Now there are two options for store:
+   - local in browser ( IndexedDB )
+   - remote service with nodeJs and mongo ( allows synchronize )
 
 Kdbx is a great format and KeeWeb is a great utility for managing passwords... but not useful for
 browser pages even with auto-type function.
@@ -22,23 +26,23 @@ Some research shows me that it's ok to store such data in local storage.
 
 ## How it works
 
-- `window.onbeforeunload` get values and css selectors of input fields;
-- `IndexedDB` there we store kdbx file and main password;
-- `kdbx` format with import/export ability; used `chromekdbx` group as root;
-- `custom_scripts` helpers for specific sites where we can't fetch data;
+- `window.onbeforeunload` - get values and css selectors of input fields;
+- `IndexedDB` or `API` - there we store kdbx file and main password;
+- `kdbx` - format with import/export ability; used `chromekdbx` group as root;
+- `custom_scripts` - helpers for specific sites where we can't fetch data;
 
 ## Dependencies
 - [kdbxweb](https://github.com/keeweb/kdbxweb) -  javascript library for read/write KeePass v2 databases
 
 ## Todo
 
-- [ ] Typescript!
-- [ ] Try to use file instead of IndexedDB;
+- [x] Typescript!
+- [ ] Try to use file instead of IndexedDB ( can't implement, switch to api instead );
 - [ ] Support multiple logins;
 - [ ] Implement kdbx import with merge (after installation case);
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
-- [ ] Remove icon after entry removed;
+- [x] Remove icon after entry removed;
 - [ ] Some error messages hanlder
 - [ ] Search in existing entries (not created by chromekdbx)
 
