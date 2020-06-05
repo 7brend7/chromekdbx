@@ -43,8 +43,9 @@ Some research shows me that it's ok to store such data in local storage.
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
 - [x] Remove icon after entry removed;
-- [ ] Some error messages hanlder
-- [ ] Search in existing entries (not created by chromekdbx)
+- [ ] Some error messages hanlder;
+- [ ] Search in existing entries (not created by chromekdbx);
+- [ ] Add 'ignore domain' into save password popup;  
 
 ## Contributing
 The project is opensource so fill free to comment and participate to it.
