@@ -47,25 +47,13 @@ Some research shows me that it's ok to store such data in local storage.
 - [ ] Search in existing entries (not created by chromekdbx);
 - [x] Add 'ignore domain' into save password popup;  
 
-## Project setup
-```
-yarn install
-```
+## Contributing
+The project is opensource so fill free to comment and participate to it.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+## Licence
 
-### Compiles and minifies for production
-```
-yarn build
-```
+[GPL 3.0.](https://github.com/7brend7/chromekdbx/blob/master/LICENSE)
 
-### Lints and fixes files
-```
-yarn lint
-```
+## Author
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+[7brend7](https://github.com/7brend7)
