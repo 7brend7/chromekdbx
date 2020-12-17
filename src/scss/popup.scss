@@ -1,5 +1,4 @@
 @import "base";
-
 main {
     width: 350px;
     height: 450px;
@@ -12,12 +11,10 @@ main {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-
     label {
         margin-left: 20px;
         font-size: 18px;
         color: $popupLabelColor;
-
         i {
             color: $popupLabelColor2;
         }
@@ -34,27 +31,21 @@ main {
     border: 1px solid $popupShadowColor;
     border-radius: 4px;
     padding: 0;
-
-
     &::-webkit-scrollbar {
         width: 5px;
     }
-
     &::-webkit-scrollbar-track {
         background: #ffffff;
     }
-
     &::-webkit-scrollbar-thumb {
         background: #ddd;
     }
-
     li {
         padding: 10px;
         //box-shadow: 0 1px 2px 0 $popupShadowColor;// #adadad;
         border-bottom: 1px solid $popupShadowColor;
         display: flex;
         align-items: center;
-
         &.popup-passwordItem_transitionOn {
             transition: all .75s ease;
         }
@@ -67,8 +58,8 @@ main {
 }
 
 .popup-icon-svg {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
 }
 
 .popup-icon {
@@ -77,8 +68,8 @@ main {
     font-size: 0;
 
     svg {
-        width: 15px;
-        height: 15px;
+        width: 13px;
+        height: 13px;
     }
 }
 
@@ -86,8 +77,11 @@ main {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    cursor: default;
     flex-grow: 1;
+
+    a {
+        color: #5e6d82;
+    }
 }
 
 .popup-emptyMsg {
@@ -103,7 +97,6 @@ main {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-
     label {
         cursor: pointer;
         display: flex;
@@ -132,4 +125,111 @@ label.popup-BottomIcons--labelLast {
 .popup-favicon {
     width: 15px;
     margin-right: 10px;
+}
+
+.settings-icon {
+    margin-left: auto;
+    align-self: flex-end;
+}
+
+.settings-content {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 14px 0;
+    flex-direction: column;
+}
+
+.settingsContent-row {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.settingsContent-label {
+    width: 80px;
+    display: inline-block;
+}
+
+.settings-content button {
+    font-size: 11px;
+    padding: 3px 5px;
+    border: 1px solid #ccc;
+    color: #5E6D82;
+    background-color: #ffffff;
+}
+
+.settings-content button:active {
+    background-color: #e7e7e7;
+}
+
+.settings-ignoredList {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    margin: -10px;
+    padding: 10px;
+
+    h4 {
+        margin: 0;
+    }
+}
+
+.settings-ignoredListContent {
+    height: 275px;
+    padding-left: 15px;
+    overflow: auto;
+
+    > li {
+        position: relative;
+
+        .popup-icon {
+            float: right;
+        }
+    }
+}
+
+.settings-close {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    display: block;
+    right: 5px;
+    top: 5px;
+
+    &:before {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 1px;
+        background: #5E6D82;
+        transform: rotate(45deg);
+        left: 0;
+        top: 50%;
+    }
+
+    &:after {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 1px;
+        background: #5E6D82;
+        transform: rotate(-45deg);
+        left: 0;
+        top: 50%;
+    }
+}
+
+.edit-content {
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 14px;
+    padding: 10px;
+    position: relative;
 }

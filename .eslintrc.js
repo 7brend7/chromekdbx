@@ -1,42 +1,31 @@
 module.exports = {
-    "env": {
-        "browser": true,
-        "es6": true,
-        "node": true,
-        "webextensions": true
+    root: true,
+    env: {
+        node: true,
+        webextensions: true
     },
-    "extends": [
-        "plugin:vue/essential",
-        "airbnb-base"
+    extends: [
+        'plugin:vue/essential',
+        'eslint:recommended',
+        '@vue/typescript/recommended',
+        '@vue/prettier',
+        '@vue/prettier/@typescript-eslint'
     ],
-    "globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+    parserOptions: {
+        ecmaVersion: 2020
     },
-    "parserOptions": {
-        "ecmaVersion": 2018,
-        "parser": "@typescript-eslint/parser",
-        "sourceType": "module"
-    },
-    "plugins": [
-        "vue",
-        "@typescript-eslint"
-    ],
-    "rules": {
-        "indent": ["error", 4],
-        "semi": ["error", "never"],
-        "max-len": ["error", { "code": 180 }],
-        "import/extensions": ["error", "never"],
-        "no-unused-vars": "off",
-        "no-async-promise-executor": "off",
-        'no-unused-expressions': ['error', { allowShortCircuit: true }],
-    },
-    "settings": {
-        "import/resolver": {
-            "node": {
-                extensions: ['.js', '.vue', '.ts'],
-                paths: ['./src']
+    rules: {
+        semi: ['error', 'never'],
+        quotes: ['error', 'single'],
+        'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+        'prettier/prettier': [
+            'error',
+            {
+                endOfLine: 'auto',
+                singleQuote: true
             }
-        }
+        ],
+        '@typescript-eslint/camelcase': 'off',
+        'no-console': 'off'
     }
-};
+}

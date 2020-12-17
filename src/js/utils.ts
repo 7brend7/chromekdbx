@@ -13,7 +13,7 @@ export const template = (tpl: string, data: { [key: string]: string }): string =
     let result = tpl
 
     // eslint-disable-next-line no-cond-assign
-    while (match = re.exec(tpl)) {
+    while ((match = re.exec(tpl))) {
         result = result.replace(match[0], data[match[1]])
     }
     return result

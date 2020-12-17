@@ -6,8 +6,8 @@
  */
 
 type PageItem = {
-    passwordField: HTMLInputElement,
-    nameField: HTMLInputElement,
+    passwordField: HTMLInputElement
+    nameField: HTMLInputElement
 }
 
 export default PageItem

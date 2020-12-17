@@ -4,14 +4,9 @@
  * Date: 06/18/19
  * Time: 17:01
  */
-import { ByteUtils, KdbxUuid, ProtectedValue } from 'kdbxweb'
 import routers from './sync_server/routers'
 import PopupItem from './Interfaces/PopupItem'
-import PageItem from './PageItem'
 import ErrorResponse from './Interfaces/ErrorResponse'
-import ApiEntry from './Interfaces/ApiEntry'
-
-const { bytesToString } = ByteUtils
 
 class ApiManager {
     private baseUrl: string | null = null
@@ -19,6 +14,8 @@ class ApiManager {
     private token: string | null = null
 
     private name: string | null = null
+
+    private dbName: string | null = null
 
     private id: string = chrome.runtime.id
 
@@ -37,7 +34,12 @@ class ApiManager {
      * @param modifyRequest
      * @param rawResponse
      */
-    private async process(uri: string | URL, method: 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DELETE', modifyRequest?: (data: RequestInit) => void, rawResponse: boolean = false): Promise<any> {
+    private async process(
+        uri: string | URL,
+        method: 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DELETE',
+        modifyRequest?: (data: RequestInit) => void,
+        rawResponse = false
+    ): Promise<any> {
         if (this.baseUrl === null || this.token === null || this.name === null) {
             throw new Error('Empty url or token')
         }
@@ -50,17 +52,17 @@ class ApiManager {
 
         const options = {
             method,
-            headers,
+            headers
         }
 
-        modifyRequest && (modifyRequest(options))
+        modifyRequest && modifyRequest(options)
 
         let res: unknown = null
 
         try {
             let genUri = uri
             if (typeof uri === 'string') {
-                genUri = (new URL(uri, this.baseUrl))
+                genUri = new URL(uri, this.baseUrl)
             }
             console.log(`querying: ${genUri}`)
 
@@ -90,10 +92,11 @@ class ApiManager {
         const apiData = localStorage.getItem(this.getDataKey())
 
         if (apiData) {
-            const { baseUrl, token, name } = JSON.parse(apiData)
+            const { baseUrl, token, name, dbName } = JSON.parse(apiData)
             this.baseUrl = baseUrl
             this.token = token
             this.name = name
+            this.dbName = dbName
         }
     }
 
@@ -101,6 +104,7 @@ class ApiManager {
         this.baseUrl = null
         this.token = null
         this.name = null
+        this.dbName = null
 
         localStorage.removeItem(this.getDataKey())
     }
@@ -122,12 +126,22 @@ class ApiManager {
         this.saveData()
     }
 
+    saveDbName(name: string): void {
+        this.dbName = name
+
+        this.saveData()
+    }
+
     saveData(): void {
-        localStorage.setItem(this.getDataKey(), JSON.stringify({
-            baseUrl: this.baseUrl,
-            name: this.name,
-            token: this.token,
-        }))
+        localStorage.setItem(
+            this.getDataKey(),
+            JSON.stringify({
+                baseUrl: this.baseUrl,
+                name: this.name,
+                token: this.token,
+                dbName: this.dbName
+            })
+        )
     }
 
     async connect(name: string, password: string): Promise<void> {
@@ -135,13 +149,15 @@ class ApiManager {
         const result: string | ErrorResponse = await this.process(routers.connect, 'POST', (data: RequestInit) => {
             data.body = JSON.stringify({
                 name,
-                password,
+                password
             })
         })
         if (!result || (result as ErrorResponse).error) {
+            // eslint-disable-next-line prettier/prettier
             throw new Error('Can\'t connect to current server with such credentials')
         }
 
+        this.saveDbName(name)
         this.saveToken(result as string)
     }
 
@@ -149,17 +165,8 @@ class ApiManager {
         return this.apiDataKey
     }
 
-    /* initDb(name: string, password: string): Promise<ApiResponse> {
-        return this.process(routers.db, 'POST', (data: RequestInit) => {
-            data.body = JSON.stringify({
-                name,
-                password
-            });
-        });
-    } */
-
     async getBinary(): Promise<ArrayBuffer> {
-        const resp: Response = await this.process(routers.db, 'GET', () => {}, true)
+        const resp: Response = await this.process(routers.db, 'GET', undefined, true)
         return await resp.arrayBuffer()
     }
 
@@ -167,30 +174,14 @@ class ApiManager {
         return this.process(routers.items, 'GET')
     }
 
-    async findItemByHost(host: string): Promise<ApiEntry[]> {
-        const data = await this.process(routers.search, 'POST', (data: RequestInit) => {
-            data.body = JSON.stringify({
-                entity: 'entry',
-                type: 'host',
-                value: host,
-            })
-        })
-
-        return data.map((item: ApiEntry): ApiEntry => ({
-            fields: {
-                ...item.fields,
-                Password: ProtectedValue.fromString(item.fields.Password as string),
-                chrome_kdbx: ProtectedValue.fromString(item.fields.chrome_kdbx as string),
-            },
-
-        }))
-    }
-
-    async synchronize(db: ArrayBuffer, time: number): Promise<{db: {[key: number]: number}, time: number}> {
-        const resp: {db: {[key: number]: number}, time: number} = await this.process(`${routers.db}/sync`, 'PUT', (data: RequestInit) => {
+    async synchronize(db: ArrayBuffer, time: number): Promise<{ db: { [key: number]: number }; time: number }> {
+        const resp: {
+            db: { [key: number]: number }
+            time: number
+        } = await this.process(`${routers.db}/sync`, 'PUT', (data: RequestInit) => {
             data.body = JSON.stringify({
                 time,
-                db: new Int8Array(db),
+                db: new Int8Array(db)
             })
         })
         return resp
@@ -198,11 +189,18 @@ class ApiManager {
 
     async saveDb(db: ArrayBuffer): Promise<void> {
         await this.process(`${routers.db}`, 'PUT', (data: RequestInit) => {
-            (data.headers as Headers).set('Content-Type', 'application/octet-stream')
+            ;(data.headers as Headers).set('Content-Type', 'application/octet-stream')
             data.body = db
         })
+    }
+
+    getBaseUrl(): string | null {
+        return this.baseUrl
+    }
+
+    getDbName(): string | null {
+        return this.dbName
     }
 }
 
 export default ApiManager
-0

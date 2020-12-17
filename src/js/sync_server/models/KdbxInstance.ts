@@ -9,19 +9,27 @@ export interface IKdbxInstanceDocument extends mongoose.Document {
     connections: IConnectionDocument[]
 }
 
-export default mongoose.model<IKdbxInstanceDocument>('KdbxInstance', new Schema({
-    name: {
-        type: Schema.Types.String,
-        trim: true,
-    },
-    content: {
-        type: Schema.Types.Buffer,
-    },
-    connections: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Connection',
-    }],
-}, {
-    timestamps: true,
-    autoIndex: true,
-}))
+export default mongoose.model<IKdbxInstanceDocument>(
+    'KdbxInstance',
+    new Schema(
+        {
+            name: {
+                type: Schema.Types.String,
+                trim: true
+            },
+            content: {
+                type: Schema.Types.Buffer
+            },
+            connections: [
+                {
+                    type: Schema.Types.ObjectId,
+                    ref: 'Connection'
+                }
+            ]
+        },
+        {
+            timestamps: true,
+            autoIndex: true
+        }
+    )
+)

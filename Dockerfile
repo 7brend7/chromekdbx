@@ -1,5 +1,5 @@
-FROM alpine:3.9
+FROM alpine
 
-RUN apk add yarn zsh
+RUN apk add nodejs yarn zsh
 
 CMD [ "tail", "-f", "/dev/null" ]

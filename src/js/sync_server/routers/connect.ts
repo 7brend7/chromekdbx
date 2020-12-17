@@ -15,12 +15,12 @@ export default (router: Router) => {
         try {
             const { name, password } = req.body
 
-            const data = <IConnectionDocument>{
+            const data = {
                 name,
                 password: new Buffer(kdbxweb.ProtectedValue.fromString(password).getBinary().buffer),
                 token: auth.getToken(),
-                extensionId: req.headers.id,
-            }
+                extensionId: req.headers.id
+            } as IConnectionDocument
 
             connection = await Connection.create(data)
 
@@ -30,7 +30,7 @@ export default (router: Router) => {
 
             res.json(connection.token)
         } catch (e) {
-            connection && (connection.remove())
+            connection && connection.remove()
             cklog.error(e.message)
             res.json({ error: 'Connection error' })
         }

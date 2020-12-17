@@ -15,6 +15,9 @@ import {
     MSG_CHECK_PAGE_ITEM,
     POPUP_SHOW_TIMEOUT,
     DETECT_PASSWORD_FIELDS_INTERVAL,
+    FILL_PASSWORD_FIELDS_INTERVAL,
+    MSG_IGNORE_LIST_CHECK,
+    MSG_IGNORE_LIST_SAVE
 } from '../constants'
 import selectorGenerator from './SelectorGenerator'
 import savePopup from './SavePopup'
@@ -25,11 +28,15 @@ class ContentScript {
     private pageItems: PageItem[] = []
 
     constructor() {
-        this.addStyles()
-        this.fillPasswordField()
-        this.detectPasswordFields()
-        this.initListeners()
-        this.initLoad()
+        chrome.runtime.sendMessage({ type: MSG_IGNORE_LIST_CHECK, host: window.location.host }, (ignored: boolean) => {
+            if (!ignored) {
+                this.addStyles()
+                this.queryPasswords()
+                this.detectPasswordFields()
+                this.initListeners()
+                this.initLoad()
+            }
+        })
     }
 
     addStyles(): void {
@@ -42,28 +49,31 @@ class ContentScript {
         document.body.appendChild(css)
     }
 
-    fillPasswordField(): void {
+    queryPasswords(): void {
         chrome.runtime.sendMessage({ type: MSG_GET_PASSWORD, url: document.location.href }, (data: PasswordItem[]) => {
             if (data.length > 0) {
-                const item = data[0] // temporary take the first one
-
-                const { nameSelector, passwordSelector } = item.selectors
-
-                const nameField = document.querySelector(nameSelector) as HTMLInputElement
-                const passwordField = document.querySelector(passwordSelector) as HTMLInputElement
-
-                if (nameField && passwordField) {
-                    nameField.value = item.name
-                    passwordField.value = item.password
-                } else {
-                    // TODO: try one more time with timeout
-                }
+                this.fillPasswordField(data[0]) // temporary take the first one
             }
         })
     }
 
+    fillPasswordField(item: PasswordItem): void {
+        const { nameSelector, passwordSelector } = item.selectors
+
+        const nameField = window.top.document.querySelector(nameSelector) as HTMLInputElement
+        const passwordField = window.top.document.querySelector(passwordSelector) as HTMLInputElement
+
+        if (nameField && passwordField) {
+            nameField.value = item.name
+            passwordField.value = item.password
+        }
+        // What about dynamics forms?
+        setTimeout(this.fillPasswordField.bind(this, item), FILL_PASSWORD_FIELDS_INTERVAL)
+    }
+
     detectPasswordFields(): void {
-        [...document.querySelectorAll<HTMLInputElement>("input[type='password']")].forEach((passwordField: HTMLInputElement) => {
+        // eslint-disable-next-line quotes
+        ;[...document.querySelectorAll<HTMLInputElement>("input[type='password']")].forEach((passwordField: HTMLInputElement) => {
             const exist = this.pageItems.find((passField: PageItem) => passwordField.isSameNode(passField.passwordField))
             if (exist) {
                 return
@@ -75,7 +85,14 @@ class ContentScript {
 
             while (!nameField && parent && parentCnt < 5) {
                 // eslint-disable-next-line no-loop-func
-                [...parent.querySelectorAll('input')].forEach((nameItem: HTMLInputElement) => (NAME_REGEXP.test(nameItem.name) || NAME_REGEXP.test(nameItem.id) || NAME_REGEXP.test(nameItem.placeholder)) && TYPE_REGEXP.test(nameItem.type) && nameItem.type !== 'hidden' && nameItem.offsetParent !== null && (nameField = nameItem))
+                ;[...parent.querySelectorAll('input')].forEach(
+                    (nameItem: HTMLInputElement) =>
+                        (NAME_REGEXP.test(nameItem.name) || NAME_REGEXP.test(nameItem.id) || NAME_REGEXP.test(nameItem.placeholder)) &&
+                        TYPE_REGEXP.test(nameItem.type) &&
+                        nameItem.type !== 'hidden' &&
+                        nameItem.offsetParent !== null &&
+                        (nameField = nameItem)
+                )
 
                 parent = parent.parentElement
                 parentCnt += 1
@@ -87,7 +104,7 @@ class ContentScript {
 
                 this.pageItems.push({
                     passwordField,
-                    nameField,
+                    nameField
                 })
             }
         })
@@ -99,7 +116,8 @@ class ContentScript {
     initListeners(): void {
         chrome.runtime.onMessage.addListener((data: any) => {
             switch (data.type) {
-            default: break
+                default:
+                    break
             }
         })
 
@@ -113,29 +131,36 @@ class ContentScript {
 
     showPopup(): void {
         if (!this.inIframe()) {
-            chrome.runtime.sendMessage({ type: MSG_CHECK_PAGE_ITEM },
-                (exist: boolean) => {
-                    exist && savePopup.show(() => {
-                        chrome.runtime.sendMessage({ type: MSG_SAVE_PASS })
-                    }, () => {
-                        chrome.runtime.sendMessage({ type: MSG_CLEAR })
-                    })
-                })
+            chrome.runtime.sendMessage({ type: MSG_CHECK_PAGE_ITEM }, (exist: boolean) => {
+                exist &&
+                    savePopup.show(
+                        () => {
+                            chrome.runtime.sendMessage({
+                                type: MSG_SAVE_PASS
+                            })
+                        },
+                        ({ neverAsk }) => {
+                            neverAsk && this.saveToIgnore()
+                            chrome.runtime.sendMessage({ type: MSG_CLEAR })
+                        }
+                    )
+            })
         }
     }
 
     beforeunload(): boolean {
         const pageItem = this.pageItems.find((item: PageItem) => item.passwordField.value !== '')
 
-        pageItem && chrome.runtime.sendMessage({
-            type: MSG_SET_CUSTOM_CONTENT,
-            name: pageItem.nameField.value,
-            password: pageItem.passwordField.value,
-            url: document.location.href,
-            title: document.title,
-            nameSelector: selectorGenerator.getQuerySelector(pageItem.nameField),
-            passwordSelector: selectorGenerator.getQuerySelector(pageItem.passwordField),
-        })
+        pageItem &&
+            chrome.runtime.sendMessage({
+                type: MSG_SET_CUSTOM_CONTENT,
+                name: pageItem.nameField.value,
+                password: pageItem.passwordField.value,
+                url: document.location.href,
+                title: document.title,
+                nameSelector: selectorGenerator.getQuerySelector(pageItem.nameField),
+                passwordSelector: selectorGenerator.getQuerySelector(pageItem.passwordField)
+            })
 
         return true
     }
@@ -146,6 +171,13 @@ class ContentScript {
         } catch (e) {
             return true
         }
+    }
+
+    saveToIgnore(): void {
+        chrome.runtime.sendMessage({
+            type: MSG_IGNORE_LIST_SAVE,
+            host: window.location.host
+        })
     }
 }
 

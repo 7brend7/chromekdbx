@@ -23,13 +23,15 @@ import dbInit from './db/init'
 const processCwd = process.cwd()
 
 dotenv.config({
-    path: path.resolve(processCwd, 'src/js/sync_server/.env'),
+    path: path.resolve(processCwd, 'src/js/sync_server/.env')
 })
+
+console.log(process.env)
 
 class Server {
     private app: Application = express()
 
-    private port: number = parseInt(<string>process.env.PORT, 10) || 443
+    private port: number = parseInt(process.env.PORT as string, 10) || 443
 
     private initOk = false
 
@@ -38,9 +40,11 @@ class Server {
         this.app.use(bodyParser.urlencoded({ extended: false }))
         this.app.use(bodyParser.json())
         this.app.use(bodyParser.raw())
-        this.app.use(morgan('tiny', <Options>{
-            skip: (req: Request, res: Response) => req.is('html'),
-        }))
+        this.app.use(
+            morgan('tiny', {
+                skip: (req: Request, res: Response) => req.is('html')
+            } as Options<Request, Response>)
+        )
 
         try {
             await dbInit()
@@ -73,7 +77,7 @@ class Server {
         routersInit.init(this.app)
 
         publicIp.v4().then((ip: string) => {
-            cklog.notice(`Your api url is: https://${ip}${routersInit.getApiPath()}`)
+            cklog.notice(`Your api url is: https://${ip}${this.port !== 443 ? `:${this.port}` : ''}${routersInit.getApiPath()}`)
         })
     }
 }

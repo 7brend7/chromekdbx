@@ -12,7 +12,7 @@ import DbConnector from './DbConnector'
 
 class DatabaseManager {
     static init(): IDatabaseManager {
-        const connectionType = <'local' | 'api'>localStorage.getItem('connectionType') || 'local'
+        const connectionType = (localStorage.getItem('connectionType') as 'local' | 'api') || 'local'
         if (connectionType === 'api') {
             return new ApiDatabaseManager()
         }

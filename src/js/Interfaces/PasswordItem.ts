@@ -9,7 +9,7 @@ export default interface PasswordItem {
     name: string
     password: string
     selectors: {
-        nameSelector: string,
-        passwordSelector: string,
+        nameSelector: string
+        passwordSelector: string
     }
 }

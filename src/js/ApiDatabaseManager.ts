@@ -1,16 +1,11 @@
-import kdbxweb, {
-    Credentials, Entry, Kdbx, KdbxUuid,
-} from 'kdbxweb'
+import kdbxweb, { Credentials, Entry, Kdbx, KdbxUuid } from 'kdbxweb'
 import ApiManager from './ApiManager'
 import PopupItem from './Interfaces/PopupItem'
 import PageItem from './PageItem'
 import IDatabaseManager from './Interfaces/IDatabaseManager'
-import ApiEntry from './Interfaces/ApiEntry'
 import LocalDatabaseManager from './LocalDatabaseManager'
 import DbConnector from './DbConnector'
 import PasswordManager from './PasswordManager'
-import SynchronizeManager from './SynchronizeManager'
-import synchronizeManagerConnector from './SynchronizeManager/connector'
 
 class ApiDatabaseManager implements IDatabaseManager {
     private apiManager: ApiManager = new ApiManager()
@@ -39,7 +34,7 @@ class ApiDatabaseManager implements IDatabaseManager {
         return (await this.getDbManager()).getAll()
     }
 
-    async findItemByHost(host: string): Promise<ApiEntry[]> {
+    async findItemByHost(host: string): Promise<Entry[]> {
         return (await this.getDbManager()).findItemByHost(host)
     }
 
@@ -52,7 +47,7 @@ class ApiDatabaseManager implements IDatabaseManager {
     }
 
     reset(): void {
-
+        console.log('reset')
     }
 
     async clear(): Promise<void> {
@@ -85,22 +80,14 @@ class ApiDatabaseManager implements IDatabaseManager {
         }
 
         const connector = new DbConnector()
-        const data = dataInput || await this.getBinary()
-
-        await connector.saveDb(data)
+        try {
+            const data = dataInput || (await this.getBinary())
+            await connector.saveDb(data)
+        } catch (e) {
+            console.warn('Cannot get binary data')
+        }
         this.databaseManager = new LocalDatabaseManager(connector)
     }
-
-    /* async synchronize(): Promise<void> {
-        const synchronizeManager = new SynchronizeManager(synchronizeManagerConnector)
-
-        const currentSyncTime: number = synchronizeManager.getCurrentTimestamp()
-        const data: ArrayBuffer = await (await this.getDbManager()).getBinary()
-        const { db, time } = await this.apiManager.synchronize(data, currentSyncTime)
-
-        synchronizeManager.setTimestamp(new Date(time))
-        await this.reloadLocal((new Int8Array(Object.values(db))).buffer)
-    } */
 
     async getFreshDb(): Promise<PopupItem[]> {
         const db: ArrayBuffer = await this.apiManager.getBinary()
@@ -111,6 +98,10 @@ class ApiDatabaseManager implements IDatabaseManager {
     async saveDb(): Promise<void> {
         const db: ArrayBuffer = await (await this.getDbManager()).getBinary()
         await this.apiManager.saveDb(db)
+    }
+
+    async getItem(id: string): Promise<Entry> {
+        return (await this.getDbManager()).getItem(id)
     }
 }
 

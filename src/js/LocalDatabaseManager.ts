@@ -5,9 +5,7 @@
  * Time: 10:45
  */
 
-import kdbxweb, {
-    Credentials, Group, Kdbx, KdbxUuid, Entry, ByteUtils,
-} from 'kdbxweb'
+import kdbxweb, { Credentials, Group, Kdbx, KdbxUuid, Entry, ByteUtils } from 'kdbxweb'
 import PageItem from './PageItem'
 import PopupItem from './Interfaces/PopupItem'
 import IDatabaseManager from './Interfaces/IDatabaseManager'
@@ -55,8 +53,8 @@ class LocalDatabaseManager implements IDatabaseManager {
 
     async saveDb(): Promise<void> {
         const db = await this.getDb()
-        const dataAsArrayBuffer = await db.save();
-        (new SynchronizeManager(synchronizeManagerConnector)).setTimestamp()
+        const dataAsArrayBuffer = await db.save()
+        new SynchronizeManager(synchronizeManagerConnector).setTimestamp()
         return this.connector.saveDb(dataAsArrayBuffer)
     }
 
@@ -125,7 +123,7 @@ class LocalDatabaseManager implements IDatabaseManager {
                 id,
                 icon,
                 name: UserName as string,
-                url: URL as string,
+                url: URL as string
             }
         })
     }
@@ -133,7 +131,7 @@ class LocalDatabaseManager implements IDatabaseManager {
     async deleteItem(id: string): Promise<void> {
         const group = await this.getChromekdbxGroup()
         group.entries = group.entries.filter((item: Entry) => {
-            (item.uuid.id === id) && this.removeIcon(item)
+            item.uuid.id === id && this.removeIcon(item)
             return item.uuid.id !== id
         })
         await this.saveDb()
@@ -144,6 +142,16 @@ class LocalDatabaseManager implements IDatabaseManager {
             const db = await this.getDb()
             delete db.meta.customIcons[entry.customIcon.toString()]
         }
+    }
+
+    async getItem(id: string): Promise<Entry> {
+        const group = await this.getChromekdbxGroup()
+        const entry = group.entries.find((item: Entry) => item.uuid.toString() === id)
+        if (!entry) {
+            throw new Error('no entry found')
+        }
+
+        return entry
     }
 }
 

@@ -11,9 +11,15 @@ export const MSG_IMPORT = 'MSG_IMPORT'
 export const MSG_IMPORT_WITH_PASSW = 'MSG_IMPORT_WITH_PASSW'
 export const MSG_GET_FRESH_DB = 'MSG_GET_FRESH_DB'
 export const MSG_SET_DB = 'MSG_SET_DB'
+export const MSG_IGNORE_LIST_SAVE = 'MSG_IGNORE_LIST_SAVE'
+export const MSG_IGNORE_LIST_CHECK = 'MSG_IGNORE_LIST_CHECK'
+export const MSG_GET_IGNORE_LIST = 'MSG_GET_IGNORE_LIST'
+export const MSG_IGNORE_LIST_REMOVE_ITEM = 'MSG_IGNORE_LIST_REMOVE_ITEM'
+export const MSG_GET_ITEM = 'MSG_GET_ITEM'
 
 export const NAME_REGEXP = /name|login|mail|key|id|e-mail/i
 export const TYPE_REGEXP = /text|mail/i
 
 export const POPUP_SHOW_TIMEOUT = 2000 // ms
 export const DETECT_PASSWORD_FIELDS_INTERVAL = 2000 // ms
+export const FILL_PASSWORD_FIELDS_INTERVAL = 2000 // ms

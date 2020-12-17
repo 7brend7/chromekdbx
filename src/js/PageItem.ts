@@ -4,21 +4,19 @@
  * Date: 1/15/19
  * Time: 10:41
  */
-import {
-    Entry, KdbxUuid, Meta, ProtectedValue,
-} from 'kdbxweb'
+import { Entry, KdbxUuid, Meta, ProtectedValue } from 'kdbxweb'
 
 export default class PageItem {
-    private name: string = ''
+    private name = ''
 
-    private password: string = ''
+    private password = ''
 
-    private url: string = ''
+    private url = ''
 
-    private title: string = ''
+    private title = ''
 
     private meta: {
-        [key: string]: any,
+        [key: string]: any
     } = {}
 
     private icon: KdbxUuid | null = null
@@ -98,7 +96,7 @@ export default class PageItem {
             url: this.getUrl(),
             title: this.title,
             meta: this.meta,
-            icon: this.icon ? this.icon.toString() : null,
+            icon: this.icon ? this.icon.toString() : null
         })
     }
 

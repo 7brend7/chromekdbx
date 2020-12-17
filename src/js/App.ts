@@ -1,15 +1,17 @@
-import { ByteUtils, Entry, ProtectedValue } from 'kdbxweb'
+import { Entry, ProtectedValue } from 'kdbxweb'
 import DatabaseManager from './DatabaseManager'
 import PageItem from './PageItem'
 import PasswordItem from './Interfaces/PasswordItem'
 import PopupItem from './Interfaces/PopupItem'
-import ApiEntry from './Interfaces/ApiEntry'
 import ApiDatabaseManager from './ApiDatabaseManager'
 import DbConnector from './DbConnector'
 import PasswordManager from './PasswordManager'
+import errorHandler from '@/js/errorHandler'
 
 type MessageSender = chrome.runtime.MessageSender
 let databaseManager = DatabaseManager.init()
+
+const IGNORE_LIST_KEY = 'ignore_list'
 
 class App {
     /**
@@ -18,14 +20,20 @@ class App {
      * @type {{}}
      */
     private data: {
-        [key: number]: PageItem;
+        [key: number]: PageItem
     } = {}
+
+    /**
+     * List of ignored hosts
+     */
+    private ignoreList: string[] = []
 
     /**
      * App constructor
      */
     constructor() {
         this.initListeners()
+        this.loadIgnoreList()
     }
 
     /**
@@ -59,9 +67,9 @@ class App {
      * @returns {Promise<boolean>}
      */
     checkPasswordExist(pageItem: PageItem): Promise<boolean> {
-        return new Promise<boolean>((res) => {
+        return new Promise<boolean>(res => {
             this.getPassword({ url: pageItem.getUrl() }, null, (items: PasswordItem[]) => {
-                res(items.filter((item) => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0)
+                res(items.filter(item => item.name === pageItem.getName() && item.password === pageItem.getPassword()).length > 0)
             })
         })
     }
@@ -149,20 +157,21 @@ class App {
      */
     getPassword(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
         const url = new URL(data.url)
-        databaseManager.findItemByHost(url.host).then((items: ApiEntry[]) => {
-            typeof sendResponse === 'function'
-                && sendResponse(
-                    items.map((item: ApiEntry) => {
+        databaseManager.findItemByHost(url.host).then((items: Entry[]) => {
+            typeof sendResponse === 'function' &&
+                sendResponse(
+                    items.map((item: Entry) => {
                         const { fields } = item
                         const password: string = fields.Password instanceof ProtectedValue ? fields.Password.getText() : fields.Password
-                        const selectors: string = fields.chrome_kdbx instanceof ProtectedValue ? fields.chrome_kdbx.getText() : fields.chrome_kdbx
+                        const selectors: string =
+                            fields.chrome_kdbx instanceof ProtectedValue ? fields.chrome_kdbx.getText() : fields.chrome_kdbx
 
                         return {
                             password,
                             name: fields.UserName,
-                            selectors: JSON.parse(selectors),
+                            selectors: JSON.parse(selectors)
                         }
-                    }),
+                    })
                 )
         })
     }
@@ -250,27 +259,37 @@ class App {
     /**
      * @see MSG_GET_FRESH_DB
      */
-    async getFreshDb(data: any, sender: MessageSender, sendResponse: (response: PopupItem[]) => void): Promise<void> {
-        const db: PopupItem[] = await (databaseManager as ApiDatabaseManager).getFreshDb()
+    async getFreshDb(data: any, sender: MessageSender, sendResponse: (response: PopupItem[] | null) => void): Promise<void> {
+        let db: PopupItem[] | null = null
+        try {
+            db = await (databaseManager as ApiDatabaseManager).getFreshDb()
+        } catch (e) {
+            console.error(e.message)
+            db = null
+            errorHandler.add(e.message)
+        }
         typeof sendResponse === 'function' && sendResponse(db)
     }
 
     /**
      * @see MSG_IMPORT
      */
-    async import({ type, data }: { type: string; data: { [key: number]: number } }, sender: MessageSender, sendResponse: (response?: any) => void): Promise<void> {
+    async import(
+        { type, data }: { type: string; data: { [key: number]: number } },
+        sender: MessageSender,
+        sendResponse: (response?: any) => void
+    ): Promise<void> {
         const db = new Int8Array(Object.values(data)).buffer
         const dbConnector = new DbConnector()
         const prevDb = await dbConnector.getDb()
         try {
-            await dbConnector.saveDb(db)
-            await this.reloadDatabaseManager()
-            // await this.saveDb(data, sender, () => {})
+            await (databaseManager as ApiDatabaseManager).reloadLocal(db)
+            await (databaseManager as ApiDatabaseManager).saveDb()
 
             typeof sendResponse === 'function' && sendResponse(true)
         } catch (e) {
-            await dbConnector.saveDb(prevDb)
-            await this.reloadDatabaseManager()
+            await (databaseManager as ApiDatabaseManager).reloadLocal(prevDb)
+            await (databaseManager as ApiDatabaseManager).saveDb()
 
             typeof sendResponse === 'function' && sendResponse(false)
         }
@@ -287,13 +306,84 @@ class App {
     async importWithPassw(
         { type, data, passwd }: { type: string; data: { [key: number]: number }; passwd: string },
         sender: MessageSender,
-        sendResponse: (response?: any) => void,
+        sendResponse: (response?: any) => void
     ): Promise<void> {
         const oldpasswd = await PasswordManager.get()
         await PasswordManager.set(passwd)
         this.import({ type, data }, sender, async (success: boolean) => {
             !success && (await PasswordManager.set(oldpasswd))
             typeof sendResponse === 'function' && sendResponse(success)
+        })
+    }
+
+    loadIgnoreList(): void {
+        const data: string | null = localStorage.getItem(IGNORE_LIST_KEY)
+
+        if (data) {
+            try {
+                this.ignoreList = JSON.parse(data)
+            } catch (e) {
+                this.ignoreList = []
+            }
+        }
+    }
+
+    /**
+     * @see MSG_IGNORE_LIST_CHECK
+     *
+     * @param data
+     * @param sender
+     * @param sendResponse
+     */
+    ignoreListCheck(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
+        typeof sendResponse === 'function' && sendResponse(this.ignoreList.includes(data.host))
+    }
+
+    /**
+     * @see MSG_IGNORE_LIST_SAVE
+     *
+     * @param data
+     * @param sender
+     * @param sendResponse
+     */
+    ignoreListSave(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
+        this.ignoreList.push(data.host)
+
+        localStorage.setItem(IGNORE_LIST_KEY, JSON.stringify(this.ignoreList))
+    }
+
+    /**
+     * @see MSG_GET_IGNORE_LIST
+     *
+
+     */
+    getIgnoreList(data: any, sender: MessageSender | null, sendResponse: (response: string[]) => void): void {
+        typeof sendResponse === 'function' && sendResponse(this.ignoreList)
+    }
+
+    /**
+     * @see MSG_IGNORE_LIST_REMOVE_ITEM
+     *
+     * @param data
+     * @param sender
+     * @param sendResponse
+     */
+    ignoreListRemoveItem(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
+        this.ignoreList = this.ignoreList.filter((item: string) => item !== data.host)
+
+        localStorage.setItem(IGNORE_LIST_KEY, JSON.stringify(this.ignoreList))
+    }
+
+    /**
+     * @see MSG_GET_ITEM
+     *
+     * @param data
+     * @param sender
+     * @param sendResponse
+     */
+    getItem(data: any, sender: MessageSender | null, sendResponse: (response?: any) => void): void {
+        databaseManager.getItem(data.id).then((data: Entry) => {
+            typeof sendResponse === 'function' && sendResponse(data)
         })
     }
 }

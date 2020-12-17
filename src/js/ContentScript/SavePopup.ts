@@ -11,16 +11,24 @@ import savePoppup from '../components/SavePopup.html'
 const POPUP_SHOW_TIMEOUT = 100
 const POPUP_CLOSE_TIMEOUT = 300
 
-class SavePopup {
-    private saveHandler: () => void = this.defaultSaveHandler
+export type SavePopupSettings = {
+    neverAsk: boolean
+}
 
-    private cancelHandler: () => void = this.defaultCancelHandler
+class SavePopup {
+    private saveHandler: (data: SavePopupSettings) => void = this.defaultSaveHandler
+
+    private cancelHandler: (data: SavePopupSettings) => void = this.defaultCancelHandler
+
+    private settings: SavePopupSettings = {
+        neverAsk: false
+    }
 
     /**
      * @param {function} saveHandler
      * @param {function} cancelHandler
      */
-    show(saveHandler: () => void, cancelHandler: () => void): void {
+    show(saveHandler: (data: SavePopupSettings) => void, cancelHandler: (data: SavePopupSettings) => void): void {
         this.saveHandler = saveHandler
         this.cancelHandler = cancelHandler
 
@@ -28,10 +36,13 @@ class SavePopup {
             'beforeend',
             template(savePoppup, {
                 baseUrl: chrome.runtime.getURL(''),
-                title: template(getTranslation('savePopup_title'), { url: window.location.host }),
+                title: template(getTranslation('savePopup_title'), {
+                    url: window.location.host
+                }),
                 btn_cancel: getTranslation('savePopup_btn_cancel'),
                 btn_save: getTranslation('savePopup_btn_save'),
-            }),
+                domain: window.location.host
+            })
         )
 
         // Animation
@@ -47,34 +58,37 @@ class SavePopup {
     closeSavePopup(): void {
         const chromekdbxSavePopup = document.getElementById('chromekdbxSavePopup')
 
+        const neverAskChk = document.getElementById('neverAsk') as HTMLInputElement
+
+        neverAskChk && (this.settings.neverAsk = neverAskChk.checked)
+
         chromekdbxSavePopup && chromekdbxSavePopup.classList.remove('chromekdbx-visible')
         setTimeout(() => {
             chromekdbxSavePopup && chromekdbxSavePopup.remove()
         }, POPUP_CLOSE_TIMEOUT)
     }
 
-    defaultSaveHandler(): void { }
+    defaultSaveHandler(): void {
+        console.log('defaultSaveHandler')
+    }
 
-    defaultCancelHandler(): void { }
-
-    savePassword(): void {
-        this.saveHandler()
-        this.closeSavePopup()
+    defaultCancelHandler(): void {
+        console.log('defaultCancelHandler')
     }
 
     popupClickListener(e: MouseEvent): void {
         const target = e.target as HTMLButtonElement
         if (target.type === 'button') {
+            this.closeSavePopup()
             switch (target.dataset.type) {
-            case 'close':
-                this.closeSavePopup()
-                this.cancelHandler()
-                break
-            case 'save':
-                this.savePassword()
-                break
-            default:
-                break
+                case 'close':
+                    this.cancelHandler(this.settings)
+                    break
+                case 'save':
+                    this.saveHandler(this.settings)
+                    break
+                default:
+                    break
             }
         }
     }

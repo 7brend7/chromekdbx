@@ -1,6 +1,6 @@
 <style>
     #chromekdbxSavePopup * {
-        font-family: "Helvetica Neue",Helvetica;
+        font-family: "Helvetica Neue", Helvetica;
         color: #5e6d82;
         font-weight: 400;
         -webkit-font-smoothing: antialiased;
@@ -52,7 +52,6 @@
 
     #chromekdbxSavePopup .chromekdbx-btn {
         float: right;
-
         padding: 8px 20px;
         cursor: pointer;
         outline: none;
@@ -69,7 +68,7 @@
     }
 
     #chromekdbxSavePopup .chromekdbx-btnSave {
-        margin-left: 20px
+        margin: 0 0 0 20px;
     }
 
     #chromekdbxSavePopup .chromekdbx-btnCancel {
@@ -81,13 +80,35 @@
     #chromekdbxSavePopup .chromekdbx-btnCancel:active {
         background-color: #d8d8d8;
     }
+
+    #chromekdbxSavePopup .chromekdbx-neverAsk {
+        display: flex;
+        align-items: center;
+        margin-left: 50px;
+        width: calc(100% - 50px);
+        cursor: pointer;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+    }
+
+    #chromekdbxSavePopup .chromekdbx-neverAsk input {
+        margin: 0 10px 0 0;
+        display: block;
+    }
 </style>
 <div id="chromekdbxSavePopup">
 
     <div class="chromekdbx-popupTitle">
-        <img src="{{baseUrl}}static/icons/keepass_32x32.png" alt="chromekdbx logo"/>
+        <img src="{{baseUrl}}static/icons/keepass_32x32.png" alt="chromekdbx logo" />
         <p>{{title}}</p>
     </div>
+
+    <label class="chromekdbx-neverAsk">
+        <input type="checkbox" id="neverAsk">
+        <span>Never ask for "{{domain}}"</span>
+    </label>
 
     <hr/>
 

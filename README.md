@@ -37,24 +37,35 @@ Some research shows me that it's ok to store such data in local storage.
 ## Todo
 
 - [x] Typescript!
-- [ ] Try to use file instead of IndexedDB ( can't implement, switch to api instead );
+- [x] Try to use file instead of IndexedDB ( can't implement, switch to api instead );
 - [ ] Support multiple logins;
-- [ ] Implement kdbx import with merge (after installation case);
+- [x] Implement kdbx import with merge (after installation case);
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
 - [x] Remove icon after entry removed;
 - [ ] Some error messages hanlder;
 - [ ] Search in existing entries (not created by chromekdbx);
-- [ ] Add 'ignore domain' into save password popup;  
+- [x] Add 'ignore domain' into save password popup;  
 
-## Contributing
-The project is opensource so fill free to comment and participate to it.
+## Project setup
+```
+yarn install
+```
 
-## Licence
+### Compiles and hot-reloads for development
+```
+yarn serve
+```
 
-[GPL 3.0.](https://github.com/7brend7/chromekdbx/blob/master/LICENSE)
+### Compiles and minifies for production
+```
+yarn build
+```
 
-## Author
+### Lints and fixes files
+```
+yarn lint
+```
 
-[7brend7](https://github.com/7brend7)
-
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).

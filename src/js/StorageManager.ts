@@ -6,14 +6,12 @@
  */
 
 // import idb, { DB, Transaction, UpgradeDB, ObjectStore } from 'idb';
-import {
-    openDB, DBSchema, IDBPDatabase, IDBPTransaction, IDBPObjectStore,
-} from 'idb'
+import { openDB, DBSchema, IDBPDatabase, IDBPTransaction, IDBPObjectStore } from 'idb'
 
 interface MyDB extends DBSchema {
-    'keyval': {
-        key: string,
-        value: number,
+    keyval: {
+        key: string
+        value: number
     }
 }
 
@@ -29,7 +27,7 @@ class StorageManager {
             this.db = await openDB<MyDB>(this.dbName, 1, {
                 upgrade(db: IDBPDatabase<MyDB>) {
                     db.createObjectStore('keyval', { autoIncrement: true })
-                },
+                }
             })
         } catch (e) {
             // eslint-disable-next-line no-console
@@ -37,7 +35,10 @@ class StorageManager {
         }
     }
 
-    getStore(): {tx: IDBPTransaction<MyDB, ['keyval']>, store: IDBPObjectStore<MyDB, ['keyval'], 'keyval'>} {
+    getStore(): {
+        tx: IDBPTransaction<MyDB, ['keyval']>
+        store: IDBPObjectStore<MyDB, ['keyval'], 'keyval'>
+    } {
         if (!this.db) {
             throw new Error('db is not initialized')
         }
@@ -46,7 +47,7 @@ class StorageManager {
 
         return {
             tx,
-            store: tx.objectStore('keyval'),
+            store: tx.objectStore('keyval')
         }
     }
 
@@ -57,9 +58,9 @@ class StorageManager {
      * @returns {Promise<string>}
      */
     static async generateName(name: string): Promise<string> {
-        const hash = await window.crypto.subtle.digest({ name: 'SHA-1' }, (new TextEncoder()).encode(`crome${name}kdbx`))
+        const hash = await window.crypto.subtle.digest({ name: 'SHA-1' }, new TextEncoder().encode(`crome${name}kdbx`))
         const hashArray = Array.from(new Uint8Array(hash))
-        return hashArray.map((b) => (`00${b.toString(16)}`).slice(-2)).join('')
+        return hashArray.map(b => `00${b.toString(16)}`.slice(-2)).join('')
     }
 
     async deleteItem(key: string): Promise<void> {

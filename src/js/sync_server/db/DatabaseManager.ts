@@ -10,13 +10,13 @@ import cklog from '../cklog'
 
 class DatabaseManager {
     private connection: {
-        [token: string]: IConnectionDocument;
+        [token: string]: IConnectionDocument
     } = {}
 
     // private passwdValue: ProtectedValue | null = null;
     // private credentials: Credentials | null = null;
     private db: {
-        [id: string]: LocalDatabaseManager;
+        [id: string]: LocalDatabaseManager
     } = {}
 
     private async initNew(token: string): Promise<boolean> {
@@ -28,7 +28,7 @@ class DatabaseManager {
         const data: Kdbx = Kdbx.create(credentials, connection.name)
         const kdbxInstance = new KdbxInstance({
             name: connection.name,
-            content: new Buffer(await data.save()),
+            content: new Buffer(await data.save())
         })
 
         this.db[kdbxInstance.id] = new LocalDatabaseManager(new DbConnector(kdbxInstance, credentials))
@@ -83,10 +83,12 @@ class DatabaseManager {
         let kdbxInstance = id ? await KdbxInstance.findById(id) : null
 
         if (!kdbxInstance) {
-            const kdbxInstanceGlobal = await KdbxInstance.findOne({ name: this.connection[token].name })
+            const kdbxInstanceGlobal = await KdbxInstance.findOne({
+                name: this.connection[token].name
+            })
             kdbxInstanceGlobal && (kdbxInstance = kdbxInstanceGlobal)
         }
-        (kdbxInstance) ? await this.initExisted(token, kdbxInstance) : await this.initNew(token)
+        kdbxInstance ? await this.initExisted(token, kdbxInstance) : await this.initNew(token)
 
         return true
     }
@@ -97,7 +99,7 @@ class DatabaseManager {
         if (!this.db || typeof this.db[id] === 'undefined') {
             if (this.connection[token] && this.connection[token].kdbxInstance) {
                 const kdbxInstance: IKdbxInstanceDocument | null = await KdbxInstance.findById(id)
-                kdbxInstance && await this.initExisted(token, kdbxInstance)
+                kdbxInstance && (await this.initExisted(token, kdbxInstance))
             } else {
                 throw new Error('No initialized database')
             }

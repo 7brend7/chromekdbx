@@ -11,30 +11,30 @@
  */
 class SelectorGenerator {
     private readonly selectorPatterns: {
-        method: (node: Element) => false | string,
-        stopChaining: boolean,
+        method: (node: Element) => false | string
+        stopChaining: boolean
     }[]
 
-    private stopPropagation: boolean = false
+    private stopPropagation = false
 
     constructor() {
         this.selectorPatterns = [
             {
                 method: this.patternId.bind(this),
-                stopChaining: true,
+                stopChaining: true
             },
             {
                 method: this.patternTagName.bind(this),
-                stopChaining: false,
+                stopChaining: false
             },
             {
                 method: this.patternClass.bind(this),
-                stopChaining: true,
+                stopChaining: true
             },
             {
                 method: this.patternChild.bind(this),
-                stopChaining: true,
-            },
+                stopChaining: true
+            }
         ]
 
         this.reset()
@@ -75,9 +75,9 @@ class SelectorGenerator {
     }
 
     private patternTagName(node: Element): false | string {
-        const tag = node.tagName.toLowerCase();
+        const tag = node.tagName.toLowerCase()
 
-        (tag === 'body') && (this.stopPropagation = true)
+        tag === 'body' && (this.stopPropagation = true)
 
         return tag
     }
@@ -88,7 +88,7 @@ class SelectorGenerator {
         if (classList.length > 0) {
             const classStr = `.${classList.join('.')}`
 
-            return (node.parentNode && Array.from(node.parentNode.querySelectorAll(classStr)).length === 1) ? classStr : false
+            return node.parentNode && Array.from(node.parentNode.querySelectorAll(classStr)).length === 1 ? classStr : false
         }
 
         return false
@@ -96,7 +96,7 @@ class SelectorGenerator {
 
     private patternChild(node: Element): false | string {
         if (node.parentNode) {
-            const childrenTags = [...node.parentNode.children].filter((item) => item.tagName.toLowerCase() === node.tagName.toLowerCase())
+            const childrenTags = [...node.parentNode.children].filter(item => item.tagName.toLowerCase() === node.tagName.toLowerCase())
 
             if (childrenTags.length > 1) {
                 const index = [...node.parentNode.children].indexOf(node)

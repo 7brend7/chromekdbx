@@ -5,14 +5,12 @@
     "default_locale": "en",
     "description": "A plain text description",
     "icons": {
-        "16": "static/icons/keepass_16x16.png",
         "32": "static/icons/keepass_32x32.png",
         "48": "static/icons/keepass_48x48.png",
         "64": "static/icons/keepass_64x64.png"
     },
     "browser_action": {
         "default_icon": {
-            "16": "static/icons/keepass_16x16.png",
             "32": "static/icons/keepass_32x32.png"
         },
         "default_popup": "views/popup.html"
@@ -21,7 +19,7 @@
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "background": {
         "scripts": [
-            "static/js/background.js"
+            "static/dist/js/background.js"
         ],
         "persistent": true
     },
@@ -31,7 +29,7 @@
                 "<all_urls>"
             ],
             "js": [
-                "static/js/content-script.js"
+                "static/dist/js/content-script.js"
             ],
             "all_frames": true,
             "run_at": "document_end"

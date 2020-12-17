@@ -17,7 +17,8 @@ export default (router: Router) => {
             res.json(items)
         } catch (e) {
             cklog.error(e.message)
-            res.json({ error: "Can't connect to db" })
+            // eslint-disable-next-line prettier/prettier
+            res.json({ error: 'Can\'t connect to db' })
         }
     })
 }
