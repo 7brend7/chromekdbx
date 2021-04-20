@@ -38,14 +38,15 @@ Some research shows me that it's ok to store such data in local storage.
 
 - [x] Typescript!
 - [x] Try to use file instead of IndexedDB ( can't implement, switch to api instead );
-- [ ] Support multiple logins;
 - [x] Implement kdbx import with merge (after installation case);
+- [x] Remove icon after entry removed;
+- [x] Add 'ignore domain' into save password popup;  
+- [ ] Support multiple logins;
 - [ ] Add search input to popup passwords list;
 - [ ] Ability to copy username / password;
-- [x] Remove icon after entry removed;
 - [ ] Some error messages hanlder;
 - [ ] Search in existing entries (not created by chromekdbx);
-- [x] Add 'ignore domain' into save password popup;  
+- [ ] Settings page: (copy url, convert to local, ...)
 
 ## Contributing
 The project is opensource so fill free to comment and participate to it.
