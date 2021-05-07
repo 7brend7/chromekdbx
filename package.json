@@ -29,7 +29,7 @@
     "rename-webpack-plugin": "^2.0.0",
     "sass": "^1.30.0",
     "sass-loader": "^10.1.0",
-    "ua-parser-js": "^0.7.22",
+    "ua-parser-js": "^0.7.24",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.1.2",
